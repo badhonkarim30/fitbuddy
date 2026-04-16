@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FitBuddy">
 <meta name="theme-color" content="#0d0d0d">
+<meta name="description" content="Family fitness tracker — workouts, food & progress">
 <title>FitBuddy</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -1569,6 +1571,7 @@ function exTips(name,muscle){
    INIT
 ═══════════════════════════════════════════ */
 window.addEventListener('load',async()=>{
+  initPWA();
   try{
     await sleep(900);
     if(!CFG.gemini&&!CFG.sheet&&!localStorage.getItem('fb_l')){go('v-setup');return;}
@@ -1583,6 +1586,79 @@ window.addEventListener('load',async()=>{
   }
 });
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+/* ═══════════════════════════════════════════
+   PWA — ICON + MANIFEST + SERVICE WORKER
+═══════════════════════════════════════════ */
+function makeFBIcon(sz){
+  sz=sz||512;
+  const cv=document.createElement('canvas');
+  cv.width=cv.height=sz;
+  const cx=cv.getContext('2d');
+  const u=sz/100;
+  // Rounded background
+  const rrBg=(r)=>{cx.beginPath();const rd=r*u;cx.moveTo(rd,0);cx.lineTo(sz-rd,0);cx.quadraticCurveTo(sz,0,sz,rd);cx.lineTo(sz,sz-rd);cx.quadraticCurveTo(sz,sz,sz-rd,sz);cx.lineTo(rd,sz);cx.quadraticCurveTo(0,sz,0,sz-rd);cx.lineTo(0,rd);cx.quadraticCurveTo(0,0,rd,0);cx.closePath();};
+  rrBg(20);
+  const bg=cx.createLinearGradient(0,0,sz,sz);
+  bg.addColorStop(0,'#1c1c1c');bg.addColorStop(1,'#080808');
+  cx.fillStyle=bg;cx.fill();
+  // Teal glow
+  const glow=cx.createRadialGradient(50*u,46*u,0,50*u,46*u,40*u);
+  glow.addColorStop(0,'rgba(0,229,180,0.20)');glow.addColorStop(1,'rgba(0,229,180,0)');
+  cx.beginPath();cx.arc(50*u,46*u,40*u,0,Math.PI*2);cx.fillStyle=glow;cx.fill();
+  // Draw filled rounded rect helper
+  const rr=(x,y,w,h,r)=>{
+    const ax=x*u,ay=y*u,aw=w*u,ah=h*u,ar=r*u;
+    cx.beginPath();cx.moveTo(ax+ar,ay);cx.lineTo(ax+aw-ar,ay);cx.quadraticCurveTo(ax+aw,ay,ax+aw,ay+ar);cx.lineTo(ax+aw,ay+ah-ar);cx.quadraticCurveTo(ax+aw,ay+ah,ax+aw-ar,ay+ah);cx.lineTo(ax+ar,ay+ah);cx.quadraticCurveTo(ax,ay+ah,ax,ay+ah-ar);cx.lineTo(ax,ay+ar);cx.quadraticCurveTo(ax,ay,ax+ar,ay);cx.closePath();cx.fill();
+  };
+  cx.fillStyle='#00e5b4';
+  // Bar
+  rr(33,43,34,8,2.5);
+  // Left collar
+  rr(26,40,9,14,2.5);
+  // Left plate
+  rr(14,34,13,26,3.5);
+  // Right collar
+  rr(65,40,9,14,2.5);
+  // Right plate
+  rr(73,34,13,26,3.5);
+  // Wordmark
+  cx.fillStyle='rgba(255,255,255,0.50)';
+  cx.font='600 '+Math.round(7.5*u)+'px Arial,sans-serif';
+  cx.textAlign='center';cx.textBaseline='middle';
+  cx.fillText('FITBUDDY',50*u,79*u);
+  return cv.toDataURL('image/png');
+}
+
+function initPWA(){
+  const icon=makeFBIcon(512);
+  // Apple touch icon — iOS home screen
+  const ati=document.createElement('link');
+  ati.rel='apple-touch-icon';
+  ati.setAttribute('sizes','512x512');
+  ati.href=icon;
+  document.head.appendChild(ati);
+  // Web App Manifest — Android / Chrome install
+  const manifest={
+    name:'FitBuddy',short_name:'FitBuddy',
+    description:'Family fitness tracker — workouts, food & progress',
+    start_url:'/fitbuddy/',scope:'/fitbuddy/',
+    display:'standalone',
+    background_color:'#0d0d0d',theme_color:'#0d0d0d',
+    orientation:'portrait-primary',
+    icons:[{src:icon,sizes:'512x512',type:'image/png',purpose:'any maskable'}]
+  };
+  const mblob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+  const ml=document.createElement('link');ml.rel='manifest';
+  ml.href=URL.createObjectURL(mblob);
+  document.head.appendChild(ml);
+  // Service Worker — offline cache + install eligibility
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/fitbuddy/sw.js',{scope:'/fitbuddy/'})
+      .then(r=>console.log('[FitBuddy] SW:',r.scope))
+      .catch(e=>console.warn('[FitBuddy] SW skipped:',e));
+  }
+}
 
 /* ═══════════════════════════════════════════
    VIEW ROUTING
