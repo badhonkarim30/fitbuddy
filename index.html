@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="FitBuddy">
 <meta name="theme-color" content="#0d0d0d">
-<meta name="description" content="Family fitness tracker — workouts, food & progress">
 <title>FitBuddy</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -520,6 +518,8 @@ input[type=number]{-moz-appearance:textfield}
 .settings-toggle{display:flex;border:1.5px solid var(--bdr2);border-radius:8px;overflow:hidden}
 .settings-toggle-btn{padding:6px 12px;font-size:13px;font-weight:700;color:var(--t3);background:transparent;border:none;cursor:pointer;transition:all .15s;white-space:nowrap}
 .settings-toggle-btn.active{background:var(--acc);color:#000}
+.ob-unit-btn{padding:6px 14px;font-size:13px;font-weight:700;color:var(--t3);background:transparent;border:none;border-radius:6px;cursor:pointer;transition:all .18s;white-space:nowrap;font-family:'Barlow',sans-serif}
+.ob-unit-btn.ob-unit-on{background:var(--acc);color:#000}
 .settings-chevron{color:var(--t3)}
 .settings-chevron svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 /* Toggle switch */
@@ -756,6 +756,29 @@ function dispMeas(cm){if(!cm&&cm!==0)return '—';return mu()==='in'?Math.round(
 function dispMeasU(){return mu();}
 function toKg(v){return wu()==='lbs'?Math.round(+v/2.2046*100)/100:+v;}
 function toCm(v){return mu()==='in'?Math.round(+v*2.54*10)/10:+v;}
+function cmToFtIn(cm){const ti=+cm/2.54;const ft=Math.floor(ti/12);const ins=Math.round((ti-ft*12)*10)/10;return{ft,in:ins};}
+function ftInToCm(ft,ins){return Math.round((+ft*12+ +ins)*2.54*10)/10;}
+function htInputHTML(pfx,htCm){
+  if(mu()==='in'){
+    const fi=htCm?cmToFtIn(htCm):{ft:'',in:''};
+    return `<div class="field"><label>Height</label><div class="f2">
+      <div style="position:relative"><input id="${pfx}ft" type="number" placeholder="5" value="${fi.ft!==''&&fi.ft!=null?fi.ft:''}" style="padding-right:30px;-webkit-user-select:text;user-select:text"><span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;font-weight:600;pointer-events:none">ft</span></div>
+      <div style="position:relative"><input id="${pfx}in" type="number" step=".1" placeholder="11" value="${fi.in!==''&&fi.in!=null?fi.in:''}" style="padding-right:30px;-webkit-user-select:text;user-select:text"><span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;font-weight:600;pointer-events:none">in</span></div>
+    </div></div>`;
+  }
+  return `<div class="field"><label>Height (cm)</label><input id="${pfx}" type="number" placeholder="175" value="${htCm?Math.round(+htCm):''}" style="-webkit-user-select:text;user-select:text"></div>`;
+}
+function htFromInputs(pfx){
+  if(mu()==='in'){
+    const ft=parseFloat(gv(pfx+'ft'));
+    const ins=parseFloat(gv(pfx+'in'));
+    if(isNaN(ft)&&isNaN(ins))return null;
+    return ftInToCm(isNaN(ft)?0:ft,isNaN(ins)?0:ins);
+  }
+  const v=parseFloat(gv(pfx));
+  return isNaN(v)?null:v;
+}
+function dispHt(cm){if(!cm)return'—';if(mu()==='in'){const fi=cmToFtIn(cm);return`${fi.ft}′${fi.in}″`;}return Math.round(+cm)+' cm';}
 
 const CFG={
   get gemini(){return localStorage.getItem('fb_g')||''},
@@ -1571,7 +1594,6 @@ function exTips(name,muscle){
    INIT
 ═══════════════════════════════════════════ */
 window.addEventListener('load',async()=>{
-  initPWA();
   try{
     await sleep(900);
     if(!CFG.gemini&&!CFG.sheet&&!localStorage.getItem('fb_l')){go('v-setup');return;}
@@ -1586,79 +1608,6 @@ window.addEventListener('load',async()=>{
   }
 });
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
-
-/* ═══════════════════════════════════════════
-   PWA — ICON + MANIFEST + SERVICE WORKER
-═══════════════════════════════════════════ */
-function makeFBIcon(sz){
-  sz=sz||512;
-  const cv=document.createElement('canvas');
-  cv.width=cv.height=sz;
-  const cx=cv.getContext('2d');
-  const u=sz/100;
-  // Rounded background
-  const rrBg=(r)=>{cx.beginPath();const rd=r*u;cx.moveTo(rd,0);cx.lineTo(sz-rd,0);cx.quadraticCurveTo(sz,0,sz,rd);cx.lineTo(sz,sz-rd);cx.quadraticCurveTo(sz,sz,sz-rd,sz);cx.lineTo(rd,sz);cx.quadraticCurveTo(0,sz,0,sz-rd);cx.lineTo(0,rd);cx.quadraticCurveTo(0,0,rd,0);cx.closePath();};
-  rrBg(20);
-  const bg=cx.createLinearGradient(0,0,sz,sz);
-  bg.addColorStop(0,'#1c1c1c');bg.addColorStop(1,'#080808');
-  cx.fillStyle=bg;cx.fill();
-  // Teal glow
-  const glow=cx.createRadialGradient(50*u,46*u,0,50*u,46*u,40*u);
-  glow.addColorStop(0,'rgba(0,229,180,0.20)');glow.addColorStop(1,'rgba(0,229,180,0)');
-  cx.beginPath();cx.arc(50*u,46*u,40*u,0,Math.PI*2);cx.fillStyle=glow;cx.fill();
-  // Draw filled rounded rect helper
-  const rr=(x,y,w,h,r)=>{
-    const ax=x*u,ay=y*u,aw=w*u,ah=h*u,ar=r*u;
-    cx.beginPath();cx.moveTo(ax+ar,ay);cx.lineTo(ax+aw-ar,ay);cx.quadraticCurveTo(ax+aw,ay,ax+aw,ay+ar);cx.lineTo(ax+aw,ay+ah-ar);cx.quadraticCurveTo(ax+aw,ay+ah,ax+aw-ar,ay+ah);cx.lineTo(ax+ar,ay+ah);cx.quadraticCurveTo(ax,ay+ah,ax,ay+ah-ar);cx.lineTo(ax,ay+ar);cx.quadraticCurveTo(ax,ay,ax+ar,ay);cx.closePath();cx.fill();
-  };
-  cx.fillStyle='#00e5b4';
-  // Bar
-  rr(33,43,34,8,2.5);
-  // Left collar
-  rr(26,40,9,14,2.5);
-  // Left plate
-  rr(14,34,13,26,3.5);
-  // Right collar
-  rr(65,40,9,14,2.5);
-  // Right plate
-  rr(73,34,13,26,3.5);
-  // Wordmark
-  cx.fillStyle='rgba(255,255,255,0.50)';
-  cx.font='600 '+Math.round(7.5*u)+'px Arial,sans-serif';
-  cx.textAlign='center';cx.textBaseline='middle';
-  cx.fillText('FITBUDDY',50*u,79*u);
-  return cv.toDataURL('image/png');
-}
-
-function initPWA(){
-  const icon=makeFBIcon(512);
-  // Apple touch icon — iOS home screen
-  const ati=document.createElement('link');
-  ati.rel='apple-touch-icon';
-  ati.setAttribute('sizes','512x512');
-  ati.href=icon;
-  document.head.appendChild(ati);
-  // Web App Manifest — Android / Chrome install
-  const manifest={
-    name:'FitBuddy',short_name:'FitBuddy',
-    description:'Family fitness tracker — workouts, food & progress',
-    start_url:'/fitbuddy/',scope:'/fitbuddy/',
-    display:'standalone',
-    background_color:'#0d0d0d',theme_color:'#0d0d0d',
-    orientation:'portrait-primary',
-    icons:[{src:icon,sizes:'512x512',type:'image/png',purpose:'any maskable'}]
-  };
-  const mblob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
-  const ml=document.createElement('link');ml.rel='manifest';
-  ml.href=URL.createObjectURL(mblob);
-  document.head.appendChild(ml);
-  // Service Worker — offline cache + install eligibility
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/fitbuddy/sw.js',{scope:'/fitbuddy/'})
-      .then(r=>console.log('[FitBuddy] SW:',r.scope))
-      .catch(e=>console.warn('[FitBuddy] SW skipped:',e));
-  }
-}
 
 /* ═══════════════════════════════════════════
    VIEW ROUTING
@@ -3198,7 +3147,7 @@ function rProTab(){
   ${macroRangeRow(m)}
   <div class="shd">Update measurements</div>
   <div class="card">
-    <div class="f2"><div class="field"><label>Weight (${dispWtU()})</label><input id="pw" type="number" step=".1" value="${dispWt(u.wt)||''}"></div><div class="field"><label>Height (${dispMeasU()})</label><input id="ph" type="number" value="${dispMeas(u.ht)||''}"></div></div>
+    <div class="f2"><div class="field"><label>Weight (${dispWtU()})</label><input id="pw" type="number" step=".1" value="${dispWt(u.wt)||''}"></div>${mu()!=='in'?`<div class="field"><label>Height (cm)</label><input id="ph" type="number" placeholder="175" value="${u.ht?Math.round(u.ht):''}"></div>`:''}</div>${mu()==='in'?htInputHTML('ph',u.ht):''}
     <div class="f2"><div class="field"><label>Neck (${dispMeasU()})</label><input id="pn" type="number" step=".1" value="${dispMeas(u.neck)||''}"></div><div class="field"><label>Waist (${dispMeasU()})</label><input id="ps" type="number" step=".1" value="${dispMeas(u.waist)||''}"></div></div>
     ${u.gender==='female'?`<div class="field"><label>Hip (${dispMeasU()})</label><input id="pp" type="number" step=".1" value="${dispMeas(u.hip)||''}"></div>`:''}
     <button class="btn bp mt8" onclick="saveRC()">Save &amp; recalculate calories</button>
@@ -3219,7 +3168,7 @@ function rProTab(){
 }
 async function saveRC(){
   const u=S.user;
-  const wt=toKg(parseFloat(gv('pw'))||dispWt(u.wt)),ht=toCm(parseFloat(gv('ph'))||dispMeas(u.ht)),nk=gv('pn')?toCm(+gv('pn')):u.neck,ws=gv('ps')?toCm(+gv('ps')):u.waist,hp=gv('pp')?toCm(+gv('pp')):u.hip;
+  const wt=toKg(parseFloat(gv('pw'))||dispWt(u.wt)),ht=htFromInputs('ph')||u.ht,nk=gv('pn')?toCm(+gv('pn')):u.neck,ws=gv('ps')?toCm(+gv('ps')):u.waist,hp=gv('pp')?toCm(+gv('pp')):u.hip;
   Object.assign(u,{wt,ht,neck:nk,waist:ws,hip:hp||null});
   u.bf=calcBF(u.gender,ht,nk,ws,hp);u.tdee=calcTDEE(u.gender,u.age,ht,wt,u.act);u.cals=calcCals(u.tdee,u.goal);
   await api('saveUser',{user:u});
@@ -3258,8 +3207,27 @@ function rObStep(){
        <div class="field"><label>Gender</label><div class="og og2"><div class="opt ${d.g==='male'?'sel':''}" onclick="opick(this,'g','male')"><span class="oi">👨</span><span class="ot">Male</span></div><div class="opt ${d.g==='female'?'sel':''}" onclick="opick(this,'g','female')"><span class="oi">👩</span><span class="ot">Female</span></div></div></div>
        <button class="btn bp mt16" onclick="os1()">Next</button>`,
     2:`<div class="obt">Your body stats</div><div class="obs">Used to calculate your exact calorie and macro targets</div>
-       <div class="f2"><div class="field"><label>Age</label><input id="oa" type="number" placeholder="25" value="${d.age||''}"></div><div class="field"><label>Height (${mu()})</label><input id="oh" type="number" placeholder="${mu()==='in'?'69':'175'}" value="${d.ht?dispMeas(d.ht):''}"></div></div>
-       <div class="field"><label>Weight (${wu()})</label><input id="ow" type="number" step=".1" placeholder="${wu()==='lbs'?'176':'80'}" value="${d.wt?dispWt(d.wt):''}"></div>
+       <div class="field"><label>Age</label><input id="oa" type="number" placeholder="25" value="${d.age||''}"></div>
+       <div class="field">
+         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+           <span class="lbl" style="margin:0">Height</span>
+           <div style="display:flex;background:var(--bg4);border-radius:6px;padding:2px;gap:1px">
+             <button class="ob-unit-btn${mu()==='cm'?' ob-unit-on':''}" style="padding:3px 10px;font-size:12px" onclick="setSetting('fb_munit','cm');rObStep()">cm</button>
+             <button class="ob-unit-btn${mu()==='in'?' ob-unit-on':''}" style="padding:3px 10px;font-size:12px" onclick="setSetting('fb_munit','in');rObStep()">ft / in</button>
+           </div>
+         </div>
+         ${mu()==='in'?(()=>{const fi=d.ht?cmToFtIn(d.ht):{ft:'',in:''};return `<div class="f2"><div style="position:relative"><input id="ohft" type="number" placeholder="5" value="${fi.ft!=null&&fi.ft!==''?fi.ft:''}" style="padding-right:30px;-webkit-user-select:text;user-select:text"><span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;font-weight:600;pointer-events:none">ft</span></div><div style="position:relative"><input id="ohin" type="number" step=".1" placeholder="11" value="${fi.in!=null&&fi.in!==''?fi.in:''}" style="padding-right:30px;-webkit-user-select:text;user-select:text"><span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;font-weight:600;pointer-events:none">in</span></div></div>`;})():`<input id="oh" type="number" placeholder="175" value="${d.ht?Math.round(d.ht):''}" style="-webkit-user-select:text;user-select:text">`}
+       </div>
+       <div class="field">
+         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+           <span class="lbl" style="margin:0">Weight</span>
+           <div style="display:flex;background:var(--bg4);border-radius:6px;padding:2px;gap:1px">
+             <button class="ob-unit-btn${wu()==='kg'?' ob-unit-on':''}" style="padding:3px 10px;font-size:12px" onclick="setSetting('fb_wunit','kg');rObStep()">kg</button>
+             <button class="ob-unit-btn${wu()==='lbs'?' ob-unit-on':''}" style="padding:3px 10px;font-size:12px" onclick="setSetting('fb_wunit','lbs');rObStep()">lbs</button>
+           </div>
+         </div>
+         <input id="ow" type="number" step=".1" placeholder="${wu()==='lbs'?'176':'80'}" value="${d.wt?dispWt(d.wt):''}" style="-webkit-user-select:text;user-select:text">
+       </div>
        <button class="btn bp mt16" onclick="os2()">Next</button>`,
     3:`<div class="obt">Body measurements</div><div class="obs">Used to calculate your body fat % using the US Navy method — the most accurate non-lab formula.</div>
        <div class="ibox">
@@ -3312,9 +3280,19 @@ function rObStep(){
 function opick(el,k,v){el.closest('.og').querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');S.ob.d[k]=v;}
 function os1(){const n=gv('on')?.trim();if(!n){toast('Enter your name','err');return;}if(!S.ob.d.g){toast('Select gender','err');return;}obAdv({name:n});}
 function os2(){
-  const a=gv('oa'),h=gv('oh'),w=gv('ow');
-  if(!a||!h||!w){toast('Fill all fields','err');return;}
-  const htCm=toCm(+h),wtKg=toKg(+w);
+  const a=gv('oa'),w=gv('ow');
+  let htCm;
+  if(mu()==='in'){
+    const ft=parseFloat(gv('ohft')),ins=parseFloat(gv('ohin'));
+    if(isNaN(ft)&&isNaN(ins)){toast('Fill all fields','err');return;}
+    htCm=ftInToCm(isNaN(ft)?0:ft,isNaN(ins)?0:ins);
+  }else{
+    const v=parseFloat(gv('oh'));
+    if(!v){toast('Fill all fields','err');return;}
+    htCm=v;
+  }
+  if(!a||!w){toast('Fill all fields','err');return;}
+  const wtKg=toKg(+w);
   const bmi=calcBMI(wtKg,htCm);
   const cat=bmi?bmiCat(bmi):null;
   if(bmi&&cat) toast(`BMI: ${bmi} — ${cat.n}`,'ok');
