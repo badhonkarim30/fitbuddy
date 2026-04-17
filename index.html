@@ -8,6 +8,7 @@
 <meta name="theme-color" content="#0d0d0d">
 <title>FitBuddy+</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 input,select,textarea{-webkit-user-select:text;user-select:text}
@@ -59,7 +60,20 @@ input[type=number]{-moz-appearance:textfield}
 .g8{height:8px}.g12{height:12px}.g16{height:16px}
 .pbar{height:4px;background:var(--bdr2);border-radius:2px;overflow:hidden}
 .pf{height:100%;background:var(--acc);border-radius:2px;transition:width .4s}
-/* BOTTOM NAV */
+/* RUN TAB */
+#run-map{width:100%;height:260px;border-radius:var(--r);overflow:hidden;background:var(--bg3);z-index:1}
+.run-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.run-stat-grid.three{grid-template-columns:1fr 1fr 1fr}
+.run-stat-box{background:var(--bg2);border:1.5px solid var(--bdr);border-radius:var(--r);padding:14px;text-align:center}
+.run-stat-val{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;color:var(--t1);line-height:1}
+.run-stat-lbl{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-top:4px}
+.run-btn-row{display:flex;gap:10px;margin-top:4px}
+.run-hist-item{background:var(--bg2);border:1.5px solid var(--bdr);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.run-hist-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.run-hist-date{font-size:13px;font-weight:600;color:var(--t3)}
+.run-hist-dist{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--acc)}
+.run-hist-stats{display:flex;gap:16px}
+.run-hist-stat{font-size:13px;color:var(--t2)}
 .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg2);border-top:1.5px solid var(--bdr);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
 .ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0;cursor:pointer;border:none;background:none;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;color:var(--t3);transition:color .2s;text-transform:uppercase;letter-spacing:.04em}
 .ni.on{color:var(--acc)}
@@ -518,6 +532,8 @@ input[type=number]{-moz-appearance:textfield}
 .settings-toggle{display:flex;border:1.5px solid var(--bdr2);border-radius:8px;overflow:hidden}
 .settings-toggle-btn{padding:6px 12px;font-size:13px;font-weight:700;color:var(--t3);background:transparent;border:none;cursor:pointer;transition:all .15s;white-space:nowrap}
 .settings-toggle-btn.active{background:var(--acc);color:#000}
+.ob-unit-btn{padding:6px 14px;font-size:13px;font-weight:700;color:var(--t3);background:transparent;border:none;border-radius:6px;cursor:pointer;transition:all .18s;white-space:nowrap;font-family:'Barlow',sans-serif}
+.ob-unit-btn.ob-unit-on{background:var(--acc);color:#000}
 .settings-chevron{color:var(--t3)}
 .settings-chevron svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 /* Toggle switch */
@@ -598,29 +614,6 @@ body.light .bc-vid-wrap{background:var(--bg3)}
   </div>
 </div>
 
-<div id="modal-weigh" class="modal-overlay" onclick="if(event.target===this)closeWeighModal()">
-  <div class="modal-sheet" style="border-radius:24px 24px 0 0;">
-    <div class="modal-hd">
-      <span class="modal-title">Enter Today's Weight</span>
-      <button class="modal-close" onclick="closeWeighModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div class="modal-body" style="padding:20px 16px;">
-      <div style="background:var(--bg);border:1.5px solid var(--bdr2);border-radius:16px;padding:20px 8px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-        <button onclick="adjWeigh(-0.5)" style="background:none;border:none;cursor:pointer;padding:8px 20px;font-size:40px;font-weight:300;color:var(--blu);line-height:1;-webkit-user-select:none;user-select:none;">−</button>
-        <div style="text-align:center;">
-          <span id="weigh-val-display" style="font-family:'Barlow Condensed',sans-serif;font-size:56px;font-weight:800;color:var(--t1);line-height:1;"></span>
-          <span id="weigh-unit-lbl" style="font-size:18px;font-weight:500;color:var(--t2);margin-left:6px;"></span>
-        </div>
-        <button onclick="adjWeigh(0.5)" style="background:none;border:none;cursor:pointer;padding:8px 20px;font-size:40px;font-weight:300;color:var(--blu);line-height:1;-webkit-user-select:none;user-select:none;">+</button>
-      </div>
-      <div style="display:flex;gap:10px;">
-        <button class="btn bg" style="flex:1;" onclick="closeWeighModal()">Cancel</button>
-        <button class="btn bp" style="flex:2;" onclick="saveWeighModal()">Save Weight</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- VIEW: SPLASH -->
 <div id="v-spl" class="view A">
   <div class="spl">
@@ -634,7 +627,7 @@ body.light .bc-vid-wrap{background:var(--bg3)}
 <div id="v-setup" class="view">
   <div class="scr">
     <div style="text-align:center;padding:32px 0 24px">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:800;color:var(--acc);letter-spacing:.1em">FITBUDDY</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:800;color:var(--acc);letter-spacing:.1em">FITBUDDY+</div>
       <div style="font-size:16px;font-weight:500;color:var(--t3);margin-top:6px">First-time setup</div>
     </div>
     <div class="card">
@@ -658,7 +651,7 @@ body.light .bc-vid-wrap{background:var(--bg3)}
 <!-- VIEW: PROFILES -->
 <div id="v-prof" class="view">
   <div style="padding:32px 16px 8px;text-align:center">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:800;color:var(--acc);letter-spacing:.1em">FITBUDDY</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:800;color:var(--acc);letter-spacing:.1em">FITBUDDY+</div>
     <div style="font-size:16px;font-weight:600;color:var(--t2);margin-top:8px">Who's training today?</div>
   </div>
   <div id="pgrid" class="pgrid"></div>
@@ -743,6 +736,7 @@ body.light .bc-vid-wrap{background:var(--bg3)}
   <div id="t-workout"  class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden"></div>
   <div id="t-progress" class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden"></div>
   <div id="t-food"     class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden"></div>
+  <div id="t-run"      class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden"></div>
   <div id="t-profile"  class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden"></div>
   <nav class="bnav">
     <button class="ni on" data-t="home" onclick="tab('home')">
@@ -756,6 +750,9 @@ body.light .bc-vid-wrap{background:var(--bg3)}
     </button>
     <button class="ni" data-t="food" onclick="tab('food')">
       <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>Food
+    </button>
+    <button class="ni" data-t="run" onclick="tab('run')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="17" cy="4" r="1.5"/><path d="M11 17.5l1.5-4.5 2.5 2.5"/><path d="M6 11.5l3.5-1 2 3 3.5-1.5"/><path d="M15.5 10l-2-3-4.5 1"/></svg>Run
     </button>
     <button class="ni" data-t="profile" onclick="tab('profile')">
       <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile
@@ -777,6 +774,29 @@ function dispMeas(cm){if(!cm&&cm!==0)return '—';return mu()==='in'?Math.round(
 function dispMeasU(){return mu();}
 function toKg(v){return wu()==='lbs'?Math.round(+v/2.2046*100)/100:+v;}
 function toCm(v){return mu()==='in'?Math.round(+v*2.54*10)/10:+v;}
+function cmToFtIn(cm){const ti=+cm/2.54;const ft=Math.floor(ti/12);const ins=Math.round((ti-ft*12)*10)/10;return{ft,in:ins};}
+function ftInToCm(ft,ins){return Math.round((+ft*12+ +ins)*2.54*10)/10;}
+function htInputHTML(pfx,htCm){
+  if(mu()==='in'){
+    const fi=htCm?cmToFtIn(htCm):{ft:'',in:''};
+    return `<div class="field"><label>Height</label><div class="f2">
+      <div style="position:relative"><input id="${pfx}ft" type="number" placeholder="5" value="${fi.ft!==''&&fi.ft!=null?fi.ft:''}" style="padding-right:30px;-webkit-user-select:text;user-select:text"><span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;font-weight:600;pointer-events:none">ft</span></div>
+      <div style="position:relative"><input id="${pfx}in" type="number" step=".1" placeholder="11" value="${fi.in!==''&&fi.in!=null?fi.in:''}" style="padding-right:30px;-webkit-user-select:text;user-select:text"><span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;font-weight:600;pointer-events:none">in</span></div>
+    </div></div>`;
+  }
+  return `<div class="field"><label>Height (cm)</label><input id="${pfx}" type="number" placeholder="175" value="${htCm?Math.round(+htCm):''}" style="-webkit-user-select:text;user-select:text"></div>`;
+}
+function htFromInputs(pfx){
+  if(mu()==='in'){
+    const ft=parseFloat(gv(pfx+'ft'));
+    const ins=parseFloat(gv(pfx+'in'));
+    if(isNaN(ft)&&isNaN(ins))return null;
+    return ftInToCm(isNaN(ft)?0:ft,isNaN(ins)?0:ins);
+  }
+  const v=parseFloat(gv(pfx));
+  return isNaN(v)?null:v;
+}
+function dispHt(cm){if(!cm)return'—';if(mu()==='in'){const fi=cmToFtIn(cm);return`${fi.ft}′${fi.in}″`;}return Math.round(+cm)+' cm';}
 
 const CFG={
   get gemini(){return localStorage.getItem('fb_g')||''},
@@ -1616,7 +1636,7 @@ function tab(name){
   const el=document.getElementById('t-'+name);
   el.style.display='flex';el.style.flexDirection='column';
   document.querySelectorAll('.ni').forEach(b=>b.classList.toggle('on',b.dataset.t===name));
-  ({home:rHome,workout:rWorkout,progress:rProgress,food:rFood,profile:rProTab})[name]?.();
+  ({home:rHome,workout:rWorkout,progress:rProgress,food:rFood,profile:rProTab,run:rRun})[name]?.();
   go('v-app');
 }
 
@@ -1658,7 +1678,7 @@ function rHome(){
   const todayStr=today();
   const workedOut=S.logs.some(l=>l.date===todayStr);
   const weighedIn=S.meas.some(m=>m.date===todayStr);
-  const totalChecks=todayWk?2:1;
+  const totalChecks=todayWk?3:2;
   const doneCount=(workedOut?1:0)+(weighedIn?1:0);
 
   let h=buildWeekStrip();
@@ -1687,11 +1707,16 @@ function rHome(){
     </div>`;
   }
 
-  h+=`<div class="cl-item${weighedIn?' done':''}" onclick="openWeighModal()">
-    <div class="cl-icon cl-icon-wt"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="2" y="18" width="20" height="3" rx="1.5" fill="currentColor" opacity="0.9"/><path d="M12 3C9.2 3 7 5 6.3 7.5L4 21h16l-2.3-13.5C17 5 14.8 3 12 3z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="12" cy="10" r="2" stroke="currentColor" stroke-width="1.8" fill="none"/><line x1="12" y1="3" x2="12" y2="5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
-    <div class="cl-text"><div class="cl-title">Weigh in</div><div class="cl-sub" id="weigh-cl-sub">${weighedIn?'Logged today':'Log your current weight'}</div></div>
+  h+=`<div class="cl-item${weighedIn?' done':''}" onclick="tab('progress')">
+    <div class="cl-icon cl-icon-wt"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><path d="M5 21h14"/><path d="M5 8l7-5 7 5"/><path d="M3 12a4 4 0 008 0H3z"/><path d="M13 12a4 4 0 008 0h-8z"/></svg></div>
+    <div class="cl-text"><div class="cl-title">Weigh in</div><div class="cl-sub">${weighedIn?'Logged today':'Log your current weight'}</div></div>
     <div class="cl-check">${weighedIn?`<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`:''}</div>
-  </div>`;
+  </div>
+  <div class="cl-item" onclick="tab('food')">
+    <div class="cl-icon cl-icon-fd"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
+    <div class="cl-text"><div class="cl-title">Nutrition guide</div><div class="cl-sub">View your food recommendations</div></div>
+    <div class="cl-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+  </div>
   </div>`;
 
   // Calorie + macro ranges
@@ -1943,37 +1968,6 @@ function openDayAssign(di){
   document.getElementById('modal-dayassign').classList.add('on');
 }
 function closeDayAssign(){document.getElementById('modal-dayassign').classList.remove('on');}
-
-let _weighVal=0;
-function openWeighModal(){
-  const u=S.user;
-  _weighVal=u.wt||70;
-  if(S.wunit==='lbs') _weighVal=Math.round(_weighVal*2.2046*10)/10;
-  document.getElementById('weigh-val-display').textContent=_weighVal.toFixed(1);
-  document.getElementById('weigh-unit-lbl').textContent=S.wunit==='lbs'?'lbs':'kgs';
-  document.getElementById('modal-weigh').classList.add('on');
-}
-function closeWeighModal(){document.getElementById('modal-weigh').classList.remove('on');}
-function adjWeigh(delta){
-  _weighVal=Math.round((_weighVal+delta)*10)/10;
-  _weighVal=Math.max(20,Math.min(500,_weighVal));
-  document.getElementById('weigh-val-display').textContent=_weighVal.toFixed(1);
-}
-function saveWeighModal(){
-  const u=S.user;
-  let kg=_weighVal;
-  if(S.wunit==='lbs') kg=Math.round((_weighVal/2.2046)*10)/10;
-  u.wt=kg;
-  const todayStr=new Date().toISOString().slice(0,10);
-  const existing=S.meas.findIndex(m=>m.date===todayStr);
-  const entry={date:todayStr,wt:kg,ts:Date.now()};
-  if(existing>=0) S.meas[existing]={...S.meas[existing],...entry};
-  else S.meas.push(entry);
-  saveUsers(); saveMeas();
-  closeWeighModal();
-  renderHome();
-  toast('Weight saved ✓','ok');
-}
 function assignWorkout(wkId){if(_assignDayIdx===null)return;S.weekPlan[_assignDayIdx]={day:DAYS_SHORT[_assignDayIdx],workoutId:wkId,rest:!wkId};saveUserWorkoutsAndPlan();closeDayAssign();rWorkout();}
 
 /* ═══════════════════════════════════════════
@@ -3171,7 +3165,7 @@ function rProTab(){
   ${macroRangeRow(m)}
   <div class="shd">Update measurements</div>
   <div class="card">
-    <div class="f2"><div class="field"><label>Weight (${dispWtU()})</label><input id="pw" type="number" step=".1" value="${dispWt(u.wt)||''}"></div><div class="field"><label>Height (${dispMeasU()})</label><input id="ph" type="number" value="${dispMeas(u.ht)||''}"></div></div>
+    <div class="f2"><div class="field"><label>Weight (${dispWtU()})</label><input id="pw" type="number" step=".1" value="${dispWt(u.wt)||''}"></div>${mu()!=='in'?`<div class="field"><label>Height (cm)</label><input id="ph" type="number" placeholder="175" value="${u.ht?Math.round(u.ht):''}"></div>`:''}</div>${mu()==='in'?htInputHTML('ph',u.ht):''}
     <div class="f2"><div class="field"><label>Neck (${dispMeasU()})</label><input id="pn" type="number" step=".1" value="${dispMeas(u.neck)||''}"></div><div class="field"><label>Waist (${dispMeasU()})</label><input id="ps" type="number" step=".1" value="${dispMeas(u.waist)||''}"></div></div>
     ${u.gender==='female'?`<div class="field"><label>Hip (${dispMeasU()})</label><input id="pp" type="number" step=".1" value="${dispMeas(u.hip)||''}"></div>`:''}
     <button class="btn bp mt8" onclick="saveRC()">Save &amp; recalculate calories</button>
@@ -3192,7 +3186,7 @@ function rProTab(){
 }
 async function saveRC(){
   const u=S.user;
-  const wt=toKg(parseFloat(gv('pw'))||dispWt(u.wt)),ht=toCm(parseFloat(gv('ph'))||dispMeas(u.ht)),nk=gv('pn')?toCm(+gv('pn')):u.neck,ws=gv('ps')?toCm(+gv('ps')):u.waist,hp=gv('pp')?toCm(+gv('pp')):u.hip;
+  const wt=toKg(parseFloat(gv('pw'))||dispWt(u.wt)),ht=htFromInputs('ph')||u.ht,nk=gv('pn')?toCm(+gv('pn')):u.neck,ws=gv('ps')?toCm(+gv('ps')):u.waist,hp=gv('pp')?toCm(+gv('pp')):u.hip;
   Object.assign(u,{wt,ht,neck:nk,waist:ws,hip:hp||null});
   u.bf=calcBF(u.gender,ht,nk,ws,hp);u.tdee=calcTDEE(u.gender,u.age,ht,wt,u.act);u.cals=calcCals(u.tdee,u.goal);
   await api('saveUser',{user:u});
@@ -3227,12 +3221,31 @@ function rObStep(){
   document.getElementById('obpf').style.width=(s/8*100)+'%';
   const steps={
     1:`<div class="obt">What's your name?</div><div class="obs">Let's personalise your experience</div>
-       <div class="field"><label>Your name</label><input id="on" type="text" placeholder="e.g. Ahmed" value="${d.name||''}"></div>
+       <div class="field"><label>Your name</label><input id="on" type="text" placeholder="e.g. Adam" value="${d.name||''}"></div>
        <div class="field"><label>Gender</label><div class="og og2"><div class="opt ${d.g==='male'?'sel':''}" onclick="opick(this,'g','male')"><span class="oi">👨</span><span class="ot">Male</span></div><div class="opt ${d.g==='female'?'sel':''}" onclick="opick(this,'g','female')"><span class="oi">👩</span><span class="ot">Female</span></div></div></div>
        <button class="btn bp mt16" onclick="os1()">Next</button>`,
     2:`<div class="obt">Your body stats</div><div class="obs">Used to calculate your exact calorie and macro targets</div>
-       <div class="f2"><div class="field"><label>Age</label><input id="oa" type="number" placeholder="25" value="${d.age||''}"></div><div class="field"><label>Height (${mu()})</label><input id="oh" type="number" placeholder="${mu()==='in'?'69':'175'}" value="${d.ht?dispMeas(d.ht):''}"></div></div>
-       <div class="field"><label>Weight (${wu()})</label><input id="ow" type="number" step=".1" placeholder="${wu()==='lbs'?'176':'80'}" value="${d.wt?dispWt(d.wt):''}"></div>
+       <div class="field"><label>Age</label><input id="oa" type="number" placeholder="25" value="${d.age||''}"></div>
+       <div class="field">
+         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+           <span class="lbl" style="margin:0">Height</span>
+           <div style="display:flex;background:var(--bg4);border-radius:6px;padding:2px;gap:1px">
+             <button class="ob-unit-btn${mu()==='cm'?' ob-unit-on':''}" style="padding:3px 10px;font-size:12px" onclick="setSetting('fb_munit','cm');rObStep()">cm</button>
+             <button class="ob-unit-btn${mu()==='in'?' ob-unit-on':''}" style="padding:3px 10px;font-size:12px" onclick="setSetting('fb_munit','in');rObStep()">ft / in</button>
+           </div>
+         </div>
+         ${mu()==='in'?(()=>{const fi=d.ht?cmToFtIn(d.ht):{ft:'',in:''};return `<div class="f2"><div style="position:relative"><input id="ohft" type="number" placeholder="5" value="${fi.ft!=null&&fi.ft!==''?fi.ft:''}" style="padding-right:30px;-webkit-user-select:text;user-select:text"><span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;font-weight:600;pointer-events:none">ft</span></div><div style="position:relative"><input id="ohin" type="number" step=".1" placeholder="11" value="${fi.in!=null&&fi.in!==''?fi.in:''}" style="padding-right:30px;-webkit-user-select:text;user-select:text"><span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;font-weight:600;pointer-events:none">in</span></div></div>`;})():`<input id="oh" type="number" placeholder="175" value="${d.ht?Math.round(d.ht):''}" style="-webkit-user-select:text;user-select:text">`}
+       </div>
+       <div class="field">
+         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+           <span class="lbl" style="margin:0">Weight</span>
+           <div style="display:flex;background:var(--bg4);border-radius:6px;padding:2px;gap:1px">
+             <button class="ob-unit-btn${wu()==='kg'?' ob-unit-on':''}" style="padding:3px 10px;font-size:12px" onclick="setSetting('fb_wunit','kg');rObStep()">kg</button>
+             <button class="ob-unit-btn${wu()==='lbs'?' ob-unit-on':''}" style="padding:3px 10px;font-size:12px" onclick="setSetting('fb_wunit','lbs');rObStep()">lbs</button>
+           </div>
+         </div>
+         <input id="ow" type="number" step=".1" placeholder="${wu()==='lbs'?'176':'80'}" value="${d.wt?dispWt(d.wt):''}" style="-webkit-user-select:text;user-select:text">
+       </div>
        <button class="btn bp mt16" onclick="os2()">Next</button>`,
     3:`<div class="obt">Body measurements</div><div class="obs">Used to calculate your body fat % using the US Navy method — the most accurate non-lab formula.</div>
        <div class="ibox">
@@ -3285,9 +3298,19 @@ function rObStep(){
 function opick(el,k,v){el.closest('.og').querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');S.ob.d[k]=v;}
 function os1(){const n=gv('on')?.trim();if(!n){toast('Enter your name','err');return;}if(!S.ob.d.g){toast('Select gender','err');return;}obAdv({name:n});}
 function os2(){
-  const a=gv('oa'),h=gv('oh'),w=gv('ow');
-  if(!a||!h||!w){toast('Fill all fields','err');return;}
-  const htCm=toCm(+h),wtKg=toKg(+w);
+  const a=gv('oa'),w=gv('ow');
+  let htCm;
+  if(mu()==='in'){
+    const ft=parseFloat(gv('ohft')),ins=parseFloat(gv('ohin'));
+    if(isNaN(ft)&&isNaN(ins)){toast('Fill all fields','err');return;}
+    htCm=ftInToCm(isNaN(ft)?0:ft,isNaN(ins)?0:ins);
+  }else{
+    const v=parseFloat(gv('oh'));
+    if(!v){toast('Fill all fields','err');return;}
+    htCm=v;
+  }
+  if(!a||!w){toast('Fill all fields','err');return;}
+  const wtKg=toKg(+w);
   const bmi=calcBMI(wtKg,htCm);
   const cat=bmi?bmiCat(bmi):null;
   if(bmi&&cat) toast(`BMI: ${bmi} — ${cat.n}`,'ok');
@@ -3657,7 +3680,7 @@ async function sendContactMsg(){
   try{
     if(TG_TOKEN && TG_CHATID){
       const date = new Date().toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-      const text = `📩 New FitBuddy message\n\n👤 Name: ${name}\n💬 Message: ${msg}\n📅 Date: ${date}`;
+      const text = `📩 New FitBuddy+ message\n\n👤 Name: ${name}\n💬 Message: ${msg}\n📅 Date: ${date}`;
       const url  = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
       const res  = await fetch(url,{
         method:'POST',
@@ -3682,6 +3705,233 @@ async function sendContactMsg(){
   }finally{
     if(btn){ btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Send message'; btn.disabled=false; }
   }
+}
+
+/* ═══════════════════════════════════════════
+   RUN — GPS TRACKING
+═══════════════════════════════════════════ */
+const RUN={
+  active:false, paused:false,
+  map:null, polyline:null, marker:null,
+  coords:[], startTs:null, pausedMs:0, pauseStart:null,
+  watchId:null, timerIv:null,
+  noSleep:null, ttsSupported:'speechSynthesis' in window,
+  lastLapDist:0, lapDistKm:1,
+  dist:0, // metres
+};
+
+function runDistKm(){return RUN.dist/1000;}
+function runDurSec(){
+  if(!RUN.startTs) return 0;
+  const elapsed=Date.now()-RUN.startTs-RUN.pausedMs;
+  return Math.floor(elapsed/1000);
+}
+function runPace(distM,durSec){
+  if(!distM||!durSec) return '—';
+  const minPkm=(durSec/60)/(distM/1000);
+  const m=Math.floor(minPkm),s=Math.round((minPkm-m)*60);
+  return `${m}:${s<10?'0'+s:s}`;
+}
+function fmtDur(sec){
+  const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;
+  if(h) return `${h}:${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
+  return `${m}:${s<10?'0'+s:s}`;
+}
+function runCalories(distM){
+  const wt=S.user?.wt||70;
+  return Math.round(distM/1000*wt*1.036);
+}
+function haversineM(a,b){
+  const R=6371000,toR=d=>d*Math.PI/180;
+  const dLat=toR(b[0]-a[0]),dLon=toR(b[1]-a[1]);
+  const x=Math.sin(dLat/2)**2+Math.cos(toR(a[0]))*Math.cos(toR(b[0]))*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+}
+
+function rRun(){
+  const el=document.getElementById('t-run');
+  if(!el) return;
+  const runs=lg('runs_'+(S.user?.id||''));
+  const histHTML=runs.length?runs.slice().reverse().map(r=>`
+    <div class="run-hist-item">
+      <div class="run-hist-top">
+        <span class="run-hist-date">${new Date(r.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</span>
+        <span class="run-hist-dist">${(r.distM/1000).toFixed(2)} km</span>
+      </div>
+      <div class="run-hist-stats">
+        <span class="run-hist-stat">⏱ ${fmtDur(r.durSec)}</span>
+        <span class="run-hist-stat">⚡ ${runPace(r.distM,r.durSec)} /km</span>
+        <span class="run-hist-stat">🔥 ${r.cals} kcal</span>
+      </div>
+    </div>`).join(''):`<div style="text-align:center;padding:32px 0;color:var(--t3);font-size:14px">No runs yet — start your first one above</div>`;
+
+  el.innerHTML=`<div class="scr" style="padding-bottom:100px">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;color:var(--t1);margin-bottom:14px">Run Tracker</div>
+    <div id="run-map"></div>
+    <div class="run-stat-grid three" style="margin-top:12px">
+      <div class="run-stat-box"><div class="run-stat-val" id="rs-dist">0.00</div><div class="run-stat-lbl">km</div></div>
+      <div class="run-stat-box"><div class="run-stat-val" id="rs-dur">0:00</div><div class="run-stat-lbl">time</div></div>
+      <div class="run-stat-box"><div class="run-stat-val" id="rs-pace">—</div><div class="run-stat-lbl">min/km</div></div>
+    </div>
+    <div class="run-stat-grid">
+      <div class="run-stat-box"><div class="run-stat-val" id="rs-cals">0</div><div class="run-stat-lbl">kcal</div></div>
+      <div class="run-stat-box"><div class="run-stat-val" id="rs-spd">0.0</div><div class="run-stat-lbl">km/h</div></div>
+    </div>
+    <div class="run-btn-row">
+      <button id="run-start-btn" class="btn bp" style="flex:2" onclick="runStart()">▶ Start run</button>
+      <button id="run-stop-btn"  class="btn bd"  style="flex:1;display:none" onclick="runStop()">■ End</button>
+    </div>
+    <div id="run-gps-note" style="font-size:12px;color:var(--t3);text-align:center;margin-top:8px;display:none">Keep screen on for GPS tracking</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--t1);margin:20px 0 10px">Run history</div>
+    <div id="run-history">${histHTML}</div>
+  </div>`;
+
+  // Init map
+  setTimeout(()=>{
+    if(RUN.map){RUN.map.remove();RUN.map=null;}
+    RUN.map=L.map('run-map',{zoomControl:false,attributionControl:false}).setView([51.505,-0.09],14);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(RUN.map);
+    RUN.polyline=L.polyline([],{color:'#00e5b4',weight:4}).addTo(RUN.map);
+    // Try to centre on user
+    navigator.geolocation?.getCurrentPosition(p=>{
+      RUN.map.setView([p.coords.latitude,p.coords.longitude],16);
+    },()=>{});
+    // Restore active run state if mid-run
+    if(RUN.active) _runRestoreUI();
+  },100);
+}
+
+function _runRestoreUI(){
+  const sb=document.getElementById('run-start-btn');
+  const eb=document.getElementById('run-stop-btn');
+  const note=document.getElementById('run-gps-note');
+  if(sb){sb.textContent=RUN.paused?'▶ Resume':'⏸ Pause';sb.onclick=RUN.paused?runResume:runPause;}
+  if(eb) eb.style.display='';
+  if(note) note.style.display='';
+  if(RUN.polyline && RUN.coords.length) RUN.polyline.setLatLngs(RUN.coords);
+}
+
+function runStart(){
+  if(RUN.active){runPause();return;}
+  if(!navigator.geolocation){toast('GPS not available on this device','err');return;}
+  // NoSleep
+  if(!RUN.noSleep) RUN.noSleep=new NoSleep();
+  RUN.noSleep.enable();
+  RUN.active=true;RUN.paused=false;
+  RUN.coords=[];RUN.dist=0;RUN.pausedMs=0;RUN.lastLapDist=0;
+  RUN.startTs=Date.now();
+  const sb=document.getElementById('run-start-btn');
+  const eb=document.getElementById('run-stop-btn');
+  const note=document.getElementById('run-gps-note');
+  if(sb){sb.textContent='⏸ Pause';sb.onclick=runPause;}
+  if(eb) eb.style.display='';
+  if(note) note.style.display='';
+  RUN.watchId=navigator.geolocation.watchPosition(_runGotPos,_runGpsErr,{enableHighAccuracy:true,maximumAge:2000,timeout:10000});
+  RUN.timerIv=setInterval(_runTick,1000);
+  toast('Run started — GPS active','ok');
+}
+
+function runPause(){
+  if(!RUN.active||RUN.paused) return;
+  RUN.paused=true;RUN.pauseStart=Date.now();
+  navigator.geolocation.clearWatch(RUN.watchId);
+  clearInterval(RUN.timerIv);
+  const sb=document.getElementById('run-start-btn');
+  if(sb){sb.textContent='▶ Resume';sb.onclick=runResume;}
+  toast('Paused','warn');
+}
+
+function runResume(){
+  if(!RUN.active||!RUN.paused) return;
+  RUN.paused=false;
+  RUN.pausedMs+=Date.now()-RUN.pauseStart;
+  RUN.watchId=navigator.geolocation.watchPosition(_runGotPos,_runGpsErr,{enableHighAccuracy:true,maximumAge:2000,timeout:10000});
+  RUN.timerIv=setInterval(_runTick,1000);
+  const sb=document.getElementById('run-start-btn');
+  if(sb){sb.textContent='⏸ Pause';sb.onclick=runPause;}
+  toast('Resumed','ok');
+}
+
+function runStop(){
+  if(!RUN.active) return;
+  navigator.geolocation.clearWatch(RUN.watchId);
+  clearInterval(RUN.timerIv);
+  RUN.noSleep?.disable();
+  const distM=RUN.dist,durSec=runDurSec(),cals=runCalories(distM);
+  RUN.active=false;RUN.paused=false;
+  // Save
+  if(distM>50){
+    const run={id:uid(),uid:S.user?.id,date:new Date().toISOString(),distM,durSec,cals,coords:RUN.coords.slice()};
+    const runs=lg('runs_'+(S.user?.id||''));
+    runs.push(run);ls('runs_'+(S.user?.id||''),runs);
+    toast(`Run saved — ${(distM/1000).toFixed(2)}km 🎉`,'ok');
+  } else {
+    toast('Run too short to save','warn');
+  }
+  // Reset UI
+  RUN.dist=0;RUN.coords=[];RUN.startTs=null;
+  const sb=document.getElementById('run-start-btn');
+  const eb=document.getElementById('run-stop-btn');
+  const note=document.getElementById('run-gps-note');
+  if(sb){sb.textContent='▶ Start run';sb.onclick=runStart;}
+  if(eb) eb.style.display='none';
+  if(note) note.style.display='none';
+  _runUpdateStats();
+  if(RUN.polyline) RUN.polyline.setLatLngs([]);
+  // Refresh history
+  setTimeout(()=>rRun(),300);
+}
+
+function _runGotPos(pos){
+  const{latitude:lat,longitude:lon,speed}=pos.coords;
+  const pt=[lat,lon];
+  if(RUN.coords.length){
+    const d=haversineM(RUN.coords[RUN.coords.length-1],pt);
+    if(d>2&&d<200){RUN.dist+=d;}
+  }
+  RUN.coords.push(pt);
+  if(RUN.map){
+    if(RUN.polyline) RUN.polyline.setLatLngs(RUN.coords);
+    if(!RUN.marker){
+      RUN.marker=L.circleMarker(pt,{radius:7,color:'#00e5b4',fillColor:'#00e5b4',fillOpacity:1,weight:2}).addTo(RUN.map);
+    } else {RUN.marker.setLatLng(pt);}
+    RUN.map.panTo(pt);
+  }
+  // Speed display
+  const spd=speed?Math.round(speed*3.6*10)/10:0;
+  const spdEl=document.getElementById('rs-spd');
+  if(spdEl) spdEl.textContent=spd.toFixed(1);
+  // Lap announcement
+  const kmDone=Math.floor(RUN.dist/1000);
+  if(kmDone>RUN.lastLapDist&&kmDone>0){
+    RUN.lastLapDist=kmDone;
+    const pace=runPace(RUN.dist,runDurSec());
+    if(RUN.ttsSupported){
+      const u=new SpeechSynthesisUtterance(`${kmDone} kilometre. Pace ${pace} per kilometre.`);
+      speechSynthesis.speak(u);
+    }
+    toast(`Lap ${kmDone}km — pace ${pace}/km`,'ok');
+  }
+}
+
+function _runGpsErr(e){
+  if(e.code===e.PERMISSION_DENIED) toast('GPS permission denied','err');
+}
+
+function _runTick(){
+  _runUpdateStats();
+}
+
+function _runUpdateStats(){
+  const distEl=document.getElementById('rs-dist');
+  const durEl=document.getElementById('rs-dur');
+  const paceEl=document.getElementById('rs-pace');
+  const calsEl=document.getElementById('rs-cals');
+  const dur=runDurSec();
+  if(distEl) distEl.textContent=(RUN.dist/1000).toFixed(2);
+  if(durEl)  durEl.textContent=fmtDur(dur);
+  if(paceEl) paceEl.textContent=runPace(RUN.dist,dur);
+  if(calsEl) calsEl.textContent=runCalories(RUN.dist);
 }
 
 </script>
@@ -3895,5 +4145,7 @@ async function sendContactMsg(){
   </div>
   <div class="scr" id="settings-body"></div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nosleep/0.12.0/NoSleep.min.js"></script>
 </body>
 </html>
