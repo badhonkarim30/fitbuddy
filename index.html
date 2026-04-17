@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0d0d0d">
-<title>FitBuddy</title>
+<title>FitBuddy+</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
@@ -518,8 +518,6 @@ input[type=number]{-moz-appearance:textfield}
 .settings-toggle{display:flex;border:1.5px solid var(--bdr2);border-radius:8px;overflow:hidden}
 .settings-toggle-btn{padding:6px 12px;font-size:13px;font-weight:700;color:var(--t3);background:transparent;border:none;cursor:pointer;transition:all .15s;white-space:nowrap}
 .settings-toggle-btn.active{background:var(--acc);color:#000}
-.ob-unit-btn{padding:6px 14px;font-size:13px;font-weight:700;color:var(--t3);background:transparent;border:none;border-radius:6px;cursor:pointer;transition:all .18s;white-space:nowrap;font-family:'Barlow',sans-serif}
-.ob-unit-btn.ob-unit-on{background:var(--acc);color:#000}
 .settings-chevron{color:var(--t3)}
 .settings-chevron svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 /* Toggle switch */
@@ -600,10 +598,33 @@ body.light .bc-vid-wrap{background:var(--bg3)}
   </div>
 </div>
 
+<div id="modal-weigh" class="modal-overlay" onclick="if(event.target===this)closeWeighModal()">
+  <div class="modal-sheet" style="border-radius:24px 24px 0 0;">
+    <div class="modal-hd">
+      <span class="modal-title">Enter Today's Weight</span>
+      <button class="modal-close" onclick="closeWeighModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body" style="padding:20px 16px;">
+      <div style="background:var(--bg);border:1.5px solid var(--bdr2);border-radius:16px;padding:20px 8px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <button onclick="adjWeigh(-0.5)" style="background:none;border:none;cursor:pointer;padding:8px 20px;font-size:40px;font-weight:300;color:var(--blu);line-height:1;-webkit-user-select:none;user-select:none;">−</button>
+        <div style="text-align:center;">
+          <span id="weigh-val-display" style="font-family:'Barlow Condensed',sans-serif;font-size:56px;font-weight:800;color:var(--t1);line-height:1;"></span>
+          <span id="weigh-unit-lbl" style="font-size:18px;font-weight:500;color:var(--t2);margin-left:6px;"></span>
+        </div>
+        <button onclick="adjWeigh(0.5)" style="background:none;border:none;cursor:pointer;padding:8px 20px;font-size:40px;font-weight:300;color:var(--blu);line-height:1;-webkit-user-select:none;user-select:none;">+</button>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn bg" style="flex:1;" onclick="closeWeighModal()">Cancel</button>
+        <button class="btn bp" style="flex:2;" onclick="saveWeighModal()">Save Weight</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- VIEW: SPLASH -->
 <div id="v-spl" class="view A">
   <div class="spl">
-    <div class="slogo">FITBUDDY</div>
+    <div class="slogo">FITBUDDY+</div>
     <div class="ssub">Your Family Fitness Partner</div>
     <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
   </div>
@@ -756,29 +777,6 @@ function dispMeas(cm){if(!cm&&cm!==0)return '—';return mu()==='in'?Math.round(
 function dispMeasU(){return mu();}
 function toKg(v){return wu()==='lbs'?Math.round(+v/2.2046*100)/100:+v;}
 function toCm(v){return mu()==='in'?Math.round(+v*2.54*10)/10:+v;}
-function cmToFtIn(cm){const ti=+cm/2.54;const ft=Math.floor(ti/12);const ins=Math.round((ti-ft*12)*10)/10;return{ft,in:ins};}
-function ftInToCm(ft,ins){return Math.round((+ft*12+ +ins)*2.54*10)/10;}
-function htInputHTML(pfx,htCm){
-  if(mu()==='in'){
-    const fi=htCm?cmToFtIn(htCm):{ft:'',in:''};
-    return `<div class="field"><label>Height</label><div class="f2">
-      <div style="position:relative"><input id="${pfx}ft" type="number" placeholder="5" value="${fi.ft!==''&&fi.ft!=null?fi.ft:''}" style="padding-right:30px;-webkit-user-select:text;user-select:text"><span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;font-weight:600;pointer-events:none">ft</span></div>
-      <div style="position:relative"><input id="${pfx}in" type="number" step=".1" placeholder="11" value="${fi.in!==''&&fi.in!=null?fi.in:''}" style="padding-right:30px;-webkit-user-select:text;user-select:text"><span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;font-weight:600;pointer-events:none">in</span></div>
-    </div></div>`;
-  }
-  return `<div class="field"><label>Height (cm)</label><input id="${pfx}" type="number" placeholder="175" value="${htCm?Math.round(+htCm):''}" style="-webkit-user-select:text;user-select:text"></div>`;
-}
-function htFromInputs(pfx){
-  if(mu()==='in'){
-    const ft=parseFloat(gv(pfx+'ft'));
-    const ins=parseFloat(gv(pfx+'in'));
-    if(isNaN(ft)&&isNaN(ins))return null;
-    return ftInToCm(isNaN(ft)?0:ft,isNaN(ins)?0:ins);
-  }
-  const v=parseFloat(gv(pfx));
-  return isNaN(v)?null:v;
-}
-function dispHt(cm){if(!cm)return'—';if(mu()==='in'){const fi=cmToFtIn(cm);return`${fi.ft}′${fi.in}″`;}return Math.round(+cm)+' cm';}
 
 const CFG={
   get gemini(){return localStorage.getItem('fb_g')||''},
@@ -1660,7 +1658,7 @@ function rHome(){
   const todayStr=today();
   const workedOut=S.logs.some(l=>l.date===todayStr);
   const weighedIn=S.meas.some(m=>m.date===todayStr);
-  const totalChecks=todayWk?3:2;
+  const totalChecks=todayWk?2:1;
   const doneCount=(workedOut?1:0)+(weighedIn?1:0);
 
   let h=buildWeekStrip();
@@ -1689,16 +1687,11 @@ function rHome(){
     </div>`;
   }
 
-  h+=`<div class="cl-item${weighedIn?' done':''}" onclick="tab('progress')">
-    <div class="cl-icon cl-icon-wt"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><path d="M5 21h14"/><path d="M5 8l7-5 7 5"/><path d="M3 12a4 4 0 008 0H3z"/><path d="M13 12a4 4 0 008 0h-8z"/></svg></div>
-    <div class="cl-text"><div class="cl-title">Weigh in</div><div class="cl-sub">${weighedIn?'Logged today':'Log your current weight'}</div></div>
+  h+=`<div class="cl-item${weighedIn?' done':''}" onclick="openWeighModal()">
+    <div class="cl-icon cl-icon-wt"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="2" y="18" width="20" height="3" rx="1.5" fill="currentColor" opacity="0.9"/><path d="M12 3C9.2 3 7 5 6.3 7.5L4 21h16l-2.3-13.5C17 5 14.8 3 12 3z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="12" cy="10" r="2" stroke="currentColor" stroke-width="1.8" fill="none"/><line x1="12" y1="3" x2="12" y2="5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+    <div class="cl-text"><div class="cl-title">Weigh in</div><div class="cl-sub" id="weigh-cl-sub">${weighedIn?'Logged today':'Log your current weight'}</div></div>
     <div class="cl-check">${weighedIn?`<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`:''}</div>
-  </div>
-  <div class="cl-item" onclick="tab('food')">
-    <div class="cl-icon cl-icon-fd"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
-    <div class="cl-text"><div class="cl-title">Nutrition guide</div><div class="cl-sub">View your food recommendations</div></div>
-    <div class="cl-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
-  </div>
+  </div>`;
   </div>`;
 
   // Calorie + macro ranges
@@ -1950,6 +1943,37 @@ function openDayAssign(di){
   document.getElementById('modal-dayassign').classList.add('on');
 }
 function closeDayAssign(){document.getElementById('modal-dayassign').classList.remove('on');}
+
+let _weighVal=0;
+function openWeighModal(){
+  const u=S.user;
+  _weighVal=u.wt||70;
+  if(S.wunit==='lbs') _weighVal=Math.round(_weighVal*2.2046*10)/10;
+  document.getElementById('weigh-val-display').textContent=_weighVal.toFixed(1);
+  document.getElementById('weigh-unit-lbl').textContent=S.wunit==='lbs'?'lbs':'kgs';
+  document.getElementById('modal-weigh').classList.add('on');
+}
+function closeWeighModal(){document.getElementById('modal-weigh').classList.remove('on');}
+function adjWeigh(delta){
+  _weighVal=Math.round((_weighVal+delta)*10)/10;
+  _weighVal=Math.max(20,Math.min(500,_weighVal));
+  document.getElementById('weigh-val-display').textContent=_weighVal.toFixed(1);
+}
+function saveWeighModal(){
+  const u=S.user;
+  let kg=_weighVal;
+  if(S.wunit==='lbs') kg=Math.round((_weighVal/2.2046)*10)/10;
+  u.wt=kg;
+  const todayStr=new Date().toISOString().slice(0,10);
+  const existing=S.meas.findIndex(m=>m.date===todayStr);
+  const entry={date:todayStr,wt:kg,ts:Date.now()};
+  if(existing>=0) S.meas[existing]={...S.meas[existing],...entry};
+  else S.meas.push(entry);
+  saveUsers(); saveMeas();
+  closeWeighModal();
+  renderHome();
+  toast('Weight saved ✓','ok');
+}
 function assignWorkout(wkId){if(_assignDayIdx===null)return;S.weekPlan[_assignDayIdx]={day:DAYS_SHORT[_assignDayIdx],workoutId:wkId,rest:!wkId};saveUserWorkoutsAndPlan();closeDayAssign();rWorkout();}
 
 /* ═══════════════════════════════════════════
@@ -3004,7 +3028,7 @@ async function lookupBarcodeAndShow(barcode){
         <div style="font-size:40px;margin-bottom:12px">🔍</div>
         <h3>Barcode not found</h3>
         <p style="margin-bottom:16px">Barcode <strong style="color:var(--t1)">${barcode}</strong> isn't in our database yet.</p>
-        <p>Add it now and every FitBuddy user will be able to find it by scanning this barcode in future.</p>
+        <p>Add it now and every FitBuddy+ user will be able to find it by scanning this barcode in future.</p>
       </div>
       <div class="create-food-btn" onclick="openCreateFood('',${JSON.stringify(barcode)})">
         <div class="create-food-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blu)" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
@@ -3147,7 +3171,7 @@ function rProTab(){
   ${macroRangeRow(m)}
   <div class="shd">Update measurements</div>
   <div class="card">
-    <div class="f2"><div class="field"><label>Weight (${dispWtU()})</label><input id="pw" type="number" step=".1" value="${dispWt(u.wt)||''}"></div>${mu()!=='in'?`<div class="field"><label>Height (cm)</label><input id="ph" type="number" placeholder="175" value="${u.ht?Math.round(u.ht):''}"></div>`:''}</div>${mu()==='in'?htInputHTML('ph',u.ht):''}
+    <div class="f2"><div class="field"><label>Weight (${dispWtU()})</label><input id="pw" type="number" step=".1" value="${dispWt(u.wt)||''}"></div><div class="field"><label>Height (${dispMeasU()})</label><input id="ph" type="number" value="${dispMeas(u.ht)||''}"></div></div>
     <div class="f2"><div class="field"><label>Neck (${dispMeasU()})</label><input id="pn" type="number" step=".1" value="${dispMeas(u.neck)||''}"></div><div class="field"><label>Waist (${dispMeasU()})</label><input id="ps" type="number" step=".1" value="${dispMeas(u.waist)||''}"></div></div>
     ${u.gender==='female'?`<div class="field"><label>Hip (${dispMeasU()})</label><input id="pp" type="number" step=".1" value="${dispMeas(u.hip)||''}"></div>`:''}
     <button class="btn bp mt8" onclick="saveRC()">Save &amp; recalculate calories</button>
@@ -3168,7 +3192,7 @@ function rProTab(){
 }
 async function saveRC(){
   const u=S.user;
-  const wt=toKg(parseFloat(gv('pw'))||dispWt(u.wt)),ht=htFromInputs('ph')||u.ht,nk=gv('pn')?toCm(+gv('pn')):u.neck,ws=gv('ps')?toCm(+gv('ps')):u.waist,hp=gv('pp')?toCm(+gv('pp')):u.hip;
+  const wt=toKg(parseFloat(gv('pw'))||dispWt(u.wt)),ht=toCm(parseFloat(gv('ph'))||dispMeas(u.ht)),nk=gv('pn')?toCm(+gv('pn')):u.neck,ws=gv('ps')?toCm(+gv('ps')):u.waist,hp=gv('pp')?toCm(+gv('pp')):u.hip;
   Object.assign(u,{wt,ht,neck:nk,waist:ws,hip:hp||null});
   u.bf=calcBF(u.gender,ht,nk,ws,hp);u.tdee=calcTDEE(u.gender,u.age,ht,wt,u.act);u.cals=calcCals(u.tdee,u.goal);
   await api('saveUser',{user:u});
@@ -3207,27 +3231,8 @@ function rObStep(){
        <div class="field"><label>Gender</label><div class="og og2"><div class="opt ${d.g==='male'?'sel':''}" onclick="opick(this,'g','male')"><span class="oi">👨</span><span class="ot">Male</span></div><div class="opt ${d.g==='female'?'sel':''}" onclick="opick(this,'g','female')"><span class="oi">👩</span><span class="ot">Female</span></div></div></div>
        <button class="btn bp mt16" onclick="os1()">Next</button>`,
     2:`<div class="obt">Your body stats</div><div class="obs">Used to calculate your exact calorie and macro targets</div>
-       <div class="field"><label>Age</label><input id="oa" type="number" placeholder="25" value="${d.age||''}"></div>
-       <div class="field">
-         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
-           <span class="lbl" style="margin:0">Height</span>
-           <div style="display:flex;background:var(--bg4);border-radius:6px;padding:2px;gap:1px">
-             <button class="ob-unit-btn${mu()==='cm'?' ob-unit-on':''}" style="padding:3px 10px;font-size:12px" onclick="setSetting('fb_munit','cm');rObStep()">cm</button>
-             <button class="ob-unit-btn${mu()==='in'?' ob-unit-on':''}" style="padding:3px 10px;font-size:12px" onclick="setSetting('fb_munit','in');rObStep()">ft / in</button>
-           </div>
-         </div>
-         ${mu()==='in'?(()=>{const fi=d.ht?cmToFtIn(d.ht):{ft:'',in:''};return `<div class="f2"><div style="position:relative"><input id="ohft" type="number" placeholder="5" value="${fi.ft!=null&&fi.ft!==''?fi.ft:''}" style="padding-right:30px;-webkit-user-select:text;user-select:text"><span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;font-weight:600;pointer-events:none">ft</span></div><div style="position:relative"><input id="ohin" type="number" step=".1" placeholder="11" value="${fi.in!=null&&fi.in!==''?fi.in:''}" style="padding-right:30px;-webkit-user-select:text;user-select:text"><span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;font-weight:600;pointer-events:none">in</span></div></div>`;})():`<input id="oh" type="number" placeholder="175" value="${d.ht?Math.round(d.ht):''}" style="-webkit-user-select:text;user-select:text">`}
-       </div>
-       <div class="field">
-         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
-           <span class="lbl" style="margin:0">Weight</span>
-           <div style="display:flex;background:var(--bg4);border-radius:6px;padding:2px;gap:1px">
-             <button class="ob-unit-btn${wu()==='kg'?' ob-unit-on':''}" style="padding:3px 10px;font-size:12px" onclick="setSetting('fb_wunit','kg');rObStep()">kg</button>
-             <button class="ob-unit-btn${wu()==='lbs'?' ob-unit-on':''}" style="padding:3px 10px;font-size:12px" onclick="setSetting('fb_wunit','lbs');rObStep()">lbs</button>
-           </div>
-         </div>
-         <input id="ow" type="number" step=".1" placeholder="${wu()==='lbs'?'176':'80'}" value="${d.wt?dispWt(d.wt):''}" style="-webkit-user-select:text;user-select:text">
-       </div>
+       <div class="f2"><div class="field"><label>Age</label><input id="oa" type="number" placeholder="25" value="${d.age||''}"></div><div class="field"><label>Height (${mu()})</label><input id="oh" type="number" placeholder="${mu()==='in'?'69':'175'}" value="${d.ht?dispMeas(d.ht):''}"></div></div>
+       <div class="field"><label>Weight (${wu()})</label><input id="ow" type="number" step=".1" placeholder="${wu()==='lbs'?'176':'80'}" value="${d.wt?dispWt(d.wt):''}"></div>
        <button class="btn bp mt16" onclick="os2()">Next</button>`,
     3:`<div class="obt">Body measurements</div><div class="obs">Used to calculate your body fat % using the US Navy method — the most accurate non-lab formula.</div>
        <div class="ibox">
@@ -3280,19 +3285,9 @@ function rObStep(){
 function opick(el,k,v){el.closest('.og').querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');S.ob.d[k]=v;}
 function os1(){const n=gv('on')?.trim();if(!n){toast('Enter your name','err');return;}if(!S.ob.d.g){toast('Select gender','err');return;}obAdv({name:n});}
 function os2(){
-  const a=gv('oa'),w=gv('ow');
-  let htCm;
-  if(mu()==='in'){
-    const ft=parseFloat(gv('ohft')),ins=parseFloat(gv('ohin'));
-    if(isNaN(ft)&&isNaN(ins)){toast('Fill all fields','err');return;}
-    htCm=ftInToCm(isNaN(ft)?0:ft,isNaN(ins)?0:ins);
-  }else{
-    const v=parseFloat(gv('oh'));
-    if(!v){toast('Fill all fields','err');return;}
-    htCm=v;
-  }
-  if(!a||!w){toast('Fill all fields','err');return;}
-  const wtKg=toKg(+w);
+  const a=gv('oa'),h=gv('oh'),w=gv('ow');
+  if(!a||!h||!w){toast('Fill all fields','err');return;}
+  const htCm=toCm(+h),wtKg=toKg(+w);
   const bmi=calcBMI(wtKg,htCm);
   const cat=bmi?bmiCat(bmi):null;
   if(bmi&&cat) toast(`BMI: ${bmi} — ${cat.n}`,'ok');
@@ -3486,7 +3481,7 @@ function saveCustomFood(){
     ],
     emoji: '⭐',
     source: 'community',
-    addedBy: S.user?.name || 'FitBuddy user',
+    addedBy: S.user?.name || 'FitBuddy+ user',
     addedAt: now()
   };
 
@@ -3618,7 +3613,7 @@ function rSettings(){
   <div class="settings-section">About</div>
   <div class="settings-group">
     <div class="settings-row">
-      <div><div class="settings-row-lbl">FitBuddy</div><div class="settings-row-sub">Version 1.0</div></div>
+      <div><div class="settings-row-lbl">FitBuddy+</div><div class="settings-row-sub">Version 1.0</div></div>
     </div>
   </div>
   <div style="height:40px"></div>`;
@@ -3857,7 +3852,7 @@ async function sendContactMsg(){
     </div>
 
     <div class="ibox">
-      <p>This food will be saved to the <strong style="color:var(--t1)">shared community database</strong> — all FitBuddy users on this network will be able to find it by searching or scanning.</p>
+      <p>This food will be saved to the <strong style="color:var(--t1)">shared community database</strong> — all FitBuddy+ users on this network will be able to find it by searching or scanning.</p>
     </div>
 
     <button class="btn bp" onclick="saveCustomFood()">
