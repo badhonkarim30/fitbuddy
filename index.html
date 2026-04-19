@@ -3347,8 +3347,8 @@ function openAIScan(){
 
 async function analysePhotoWithGemini(base64){
   const prompt=`Identify each food in this photo and estimate nutrition. Return ONLY valid JSON array, no markdown: [{"name":"food name","brand":"Generic","qty":100,"per100":{"cal":150,"p":10,"c":20,"f":5},"emoji":"🍽️"}] Include 1-8 items. Estimate realistic portion sizes.`;
-  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${CFG.gemini}`,{
-    method:'POST',headers:{'Content-Type':'application/json'},
+  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent`,{
+    method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':CFG.gemini},
     body:JSON.stringify({contents:[{parts:[{text:prompt},{inline_data:{mime_type:'image/jpeg',data:base64}}]}],generationConfig:{temperature:.3,maxOutputTokens:800}})
   });
   const d=await r.json();
@@ -3678,7 +3678,7 @@ function skipSetup(){go('v-auth');}
    GEMINI
 ═══════════════════════════════════════════ */
 async function gemini(p){
-  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${CFG.gemini}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:p}]}],generationConfig:{temperature:.7,maxOutputTokens:1000}})});
+  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':CFG.gemini},body:JSON.stringify({contents:[{parts:[{text:p}]}],generationConfig:{temperature:.7,maxOutputTokens:1000}})});
   const d=await r.json();if(d.error)throw new Error(d.error.message);return d.candidates[0].content.parts[0].text;
 }
 
@@ -4436,8 +4436,8 @@ async function sendAIMsg(){
     if(contents.length===0){
       contents.push({role:'user',parts:[{text:systemCtx+'\n\n---\nUser: '+text}]});
     }
-    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${CFG.gemini}`,{
-      method:'POST',headers:{'Content-Type':'application/json'},
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent`,{
+      method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':CFG.gemini},
       body:JSON.stringify({contents,generationConfig:{temperature:.7,maxOutputTokens:600}})
     });
     const d=await r.json();
