@@ -3323,37 +3323,11 @@ function lookupManualBarcode(){
 }
 
 function openAIScan(){
-  if(!CFG.gemini){toast('Add a Gemini API key in Settings for AI scanning','warn');return;}
-  const input=document.createElement('input');
-  input.type='file';input.accept='image/*';input.capture='environment';
-  input.onchange=async(e)=>{
-    const file=e.target.files?.[0];if(!file)return;
-    const b64=await fileToB64(file);
-    const resEl=document.getElementById('fs-results');
-    if(resEl)resEl.innerHTML=`<div class="ai-ldg"><div class="ai-ldg-icon">🤖</div><div class="ai-ldg-title">Analysing your meal...</div><div class="ai-ldg-sub">AI is identifying foods and estimating nutrition</div></div>`;
-    if(!document.getElementById('v-foodsearch')?.classList.contains('A'))go('v-foodsearch');
-    try{
-      const results=await analysePhotoWithGemini(b64);
-      if(!results||!results.length){if(resEl)resEl.innerHTML=`<div class="emp"><h3>Could not identify</h3><p>Try the Describe option instead.</p></div>`;return;}
-      if(resEl)resEl.innerHTML=`<div class="fr-sec">AI identified these — tap to add</div>`+results.map(f=>foodItemHTML(f)).join('');
-    }catch(err){
-      if(resEl)resEl.innerHTML='';
-      toast('AI scan failed: '+err.message,'err');
-      console.error('AI scan error:',err);
-    }
-  };
-  input.click();
+  toast('AI food scan — coming soon 🚀','ok');
 }
 
 async function analysePhotoWithGemini(base64){
-  const prompt=`Identify each food in this photo and estimate nutrition. Return ONLY valid JSON array, no markdown: [{"name":"food name","brand":"Generic","qty":100,"per100":{"cal":150,"p":10,"c":20,"f":5},"emoji":"🍽️"}] Include 1-8 items. Estimate realistic portion sizes.`;
-  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent`,{
-    method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':CFG.gemini},
-    body:JSON.stringify({contents:[{parts:[{text:prompt},{inline_data:{mime_type:'image/jpeg',data:base64}}]}],generationConfig:{temperature:.3,maxOutputTokens:800}})
-  });
-  const d=await r.json();
-  if(d.error)throw new Error(d.error.message);
-  return JSON.parse(d.candidates[0].content.parts[0].text.replace(/```json|```/g,'').trim());
+  return [];
 }
 
 function openDescribe(){
@@ -3363,21 +3337,7 @@ function openDescribe(){
   go('v-describe');
 }
 async function describeFood(){
-  const desc=document.getElementById('describe-in')?.value?.trim();
-  if(!desc){toast('Describe what you ate first','err');return;}
-  if(!CFG.gemini){toast('Add a Gemini API key in Settings','warn');return;}
-  document.getElementById('describe-result').innerHTML=`<div class="ai-ldg"><div class="ai-ldg-icon">🤖</div><div class="ai-ldg-title">Estimating nutrition...</div></div>`;
-  try{
-    const prompt=`Estimate nutrition for: "${desc}"
-Return ONLY valid JSON array, no markdown:
-[{"name":"food","brand":"Generic","qty":150,"per100":{"cal":165,"p":31,"c":0,"f":3.6},"emoji":"🍽️"}]
-1-8 items max.`;
-    const r=await gemini(prompt);
-    const items=JSON.parse(r.replace(/```json|```/g,'').trim());
-    document.getElementById('describe-result').innerHTML=`<div class="fr-sec">Tap each item to add to ${S.fdMeal}</div>`+items.map(f=>foodItemHTML(f)).join('');
-  }catch(e){
-    document.getElementById('describe-result').innerHTML=`<div class="emp"><p>Estimation failed. Try a simpler description.</p></div>`;
-  }
+  document.getElementById('describe-result').innerHTML=`<div class="ibox"><p>🚀 AI food description is coming soon. Use the search or barcode scanner in the meantime.</p></div>`;
 }
 
 function fileToB64(file){
@@ -3678,8 +3638,7 @@ function skipSetup(){go('v-auth');}
    GEMINI
 ═══════════════════════════════════════════ */
 async function gemini(p){
-  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent`,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':CFG.gemini},body:JSON.stringify({contents:[{parts:[{text:p}]}],generationConfig:{temperature:.7,maxOutputTokens:1000}})});
-  const d=await r.json();if(d.error)throw new Error(d.error.message);return d.candidates[0].content.parts[0].text;
+  throw new Error('AI coming soon');
 }
 
 /* ═══════════════════════════════════════════
@@ -4372,88 +4331,26 @@ ${foodSummary}`;
 }
 
 function openAIChat(){
-  if(!CFG.gemini){toast('Add a Gemini API key in Settings to use AI Coach','warn');return;}
   document.getElementById('modal-aichat').classList.add('on');
   if(AI.msgs.length===0){
-    AI.msgs=[{role:'ai',text:`Hey ${S.user?.name||'there'}! 👋 I'm your AI Coach. I can see your workouts, nutrition, measurements and goals. What would you like to work on today?`}];
+    AI.msgs=[{role:'ai',text:`Hey ${S.user?.name||'there'}! 👋 AI Coach is coming soon. We\'re working on bringing you personalised coaching based on your workouts, nutrition and goals. Stay tuned! 🚀`}];
     renderAIMsgs();
   }
-  setTimeout(()=>document.getElementById('ai-chat-input')?.focus(),300);
 }
-
-function closeAIChat(){
-  document.getElementById('modal-aichat').classList.remove('on');
+function aiChatKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendAIMsg();}
+}
+async function sendAIMsg(){
+  const inp=document.getElementById('ai-chat-input');
+  inp.value='';
+  AI.msgs.push({role:'ai',text:'AI Coach is coming soon 🚀'});
+  renderAIMsgs();
 }
 
 function renderAIMsgs(){
   const el=document.getElementById('ai-chat-msgs');if(!el)return;
   el.innerHTML=AI.msgs.map(m=>`<div class="ai-msg ${m.role}${m.typing?' typing':''}">${m.text.replace(/\n/g,'<br>')}</div>`).join('');
   el.scrollTop=el.scrollHeight;
-}
-
-function aiChatKey(e){
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendAIMsg();}
-}
-
-async function sendAIMsg(){
-  if(AI.busy)return;
-  const inp=document.getElementById('ai-chat-input');
-  const text=inp?.value?.trim();
-  if(!text)return;
-  inp.value='';inp.style.height='auto';
-  AI.msgs.push({role:'user',text});
-  AI.msgs.push({role:'ai',text:'Thinking…',typing:true});
-  renderAIMsgs();
-  AI.busy=true;
-  const btn=document.getElementById('ai-send-btn');
-  if(btn)btn.disabled=true;
-  try{
-    const systemCtx=buildUserContext();
-    // Build contents — Gemini requires strict user/model alternation starting with user
-    // Exclude the initial greeting (it's UI only), only use real conversation turns
-    const realMsgs=AI.msgs.filter(m=>!m.typing&&m.text!==AI.msgs[0]?.text).slice(-10);
-    // Build contents array — must start with user
-    const contents=[];
-    // First turn: system context + first user message
-    const firstUser=realMsgs.find(m=>m.role==='user');
-    if(!firstUser){
-      // Shouldn't happen but fallback
-      contents.push({role:'user',parts:[{text:systemCtx+'\n\n---\n'+text}]});
-    } else {
-      let systemInjected=false;
-      for(const m of realMsgs){
-        const role=m.role==='user'?'user':'model';
-        let msgText=m.text;
-        if(!systemInjected&&role==='user'){
-          msgText=systemCtx+'\n\n---\nUser: '+msgText;
-          systemInjected=true;
-        }
-        // Gemini needs strict alternation — skip if same role as last
-        if(contents.length>0&&contents[contents.length-1].role===role) continue;
-        contents.push({role,parts:[{text:msgText}]});
-      }
-    }
-    if(contents.length===0){
-      contents.push({role:'user',parts:[{text:systemCtx+'\n\n---\nUser: '+text}]});
-    }
-    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent`,{
-      method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':CFG.gemini},
-      body:JSON.stringify({contents,generationConfig:{temperature:.7,maxOutputTokens:600}})
-    });
-    const d=await r.json();
-    if(d.error)throw new Error(d.error.message||JSON.stringify(d.error));
-    const reply=d.candidates?.[0]?.content?.parts?.[0]?.text||'Sorry, I couldn\'t generate a response.';
-    AI.msgs=AI.msgs.filter(m=>!m.typing);
-    AI.msgs.push({role:'ai',text:reply});
-  }catch(err){
-    AI.msgs=AI.msgs.filter(m=>!m.typing);
-    AI.msgs.push({role:'ai',text:'Error: '+err.message});
-    console.error('AI chat error:',err);
-  }finally{
-    AI.busy=false;
-    if(btn)btn.disabled=false;
-    renderAIMsgs();
-  }
 }
 
 </script>
