@@ -847,7 +847,7 @@ function htFromInputs(pfx){
 function dispHt(cm){if(!cm)return'—';if(mu()==='in'){const fi=cmToFtIn(cm);return`${fi.ft}′${fi.in}″`;}return Math.round(+cm)+' cm';}
 
 const CFG={
-  get gemini(){return localStorage.getItem('fb_g')||''},
+  get gemini(){return localStorage.getItem('fb_g')||'AIzaSyBreoBNPlFIrOInJPrcw9Q3j7U0FIAxTMQ'},
   get sheet(){return localStorage.getItem('fb_s')||''},
   set gemini(v){localStorage.setItem('fb_g',v)},
   set sheet(v){localStorage.setItem('fb_s',v)}
