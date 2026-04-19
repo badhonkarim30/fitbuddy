@@ -3958,7 +3958,15 @@ function toggleNotifSetting(on){
     Notification.requestPermission().then(p=>{setSetting('fb_notif',p==='granted'?'1':'0');rSettings();});
   }else{setSetting('fb_notif',on?'1':'0');}
 }
-function saveGeminiKey(){const v=document.getElementById('sett-gemini')?.value?.trim();if(v)CFG.gemini=v;toast('Gemini key saved','ok');rSettings();}
+function saveGeminiKey(){
+  const raw=document.getElementById('sett-gemini')?.value||'';
+  const v=raw.trim().replace(/^["']|["']$/g,'');
+  if(!v){toast('Please enter a key','err');return;}
+  if(!v.startsWith('AIza')){toast('Key should start with AIza…','warn');}
+  localStorage.setItem('fb_g',v);
+  toast('Gemini key saved ✓','ok');
+  rSettings();
+}
 function saveSheetUrl(){const v=document.getElementById('sett-sheet')?.value?.trim();if(v)CFG.sheet=v;toast('Sheets URL saved','ok');rSettings();}
 function setTheme(t){
   localStorage.setItem('fb_theme',t);
@@ -4398,14 +4406,14 @@ async function sendAIMsg(){
       body:JSON.stringify({contents,generationConfig:{temperature:.7,maxOutputTokens:600}})
     });
     const d=await r.json();
-    if(d.error)throw new Error(d.error.message);
+    if(d.error)throw new Error(d.error.message||JSON.stringify(d.error));
     const reply=d.candidates?.[0]?.content?.parts?.[0]?.text||'Sorry, I couldn\'t generate a response.';
     // Replace typing indicator
     AI.msgs=AI.msgs.filter(m=>!m.typing);
     AI.msgs.push({role:'ai',text:reply});
   }catch(err){
     AI.msgs=AI.msgs.filter(m=>!m.typing);
-    AI.msgs.push({role:'ai',text:'Sorry, something went wrong. Check your Gemini API key in Settings.'});
+    AI.msgs.push({role:'ai',text:'Error: '+err.message+'. Check your Gemini API key in Settings.'});
     console.error('AI chat error:',err);
   }finally{
     AI.busy=false;
