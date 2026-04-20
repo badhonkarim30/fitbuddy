@@ -846,7 +846,7 @@ function htFromInputs(pfx){
 function dispHt(cm){if(!cm)return'—';if(mu()==='in'){const fi=cmToFtIn(cm);return`${fi.ft}′${fi.in}″`;}return Math.round(+cm)+' cm';}
 
 const CFG={
-  get gemini(){return localStorage.getItem('fb_g')||'AIzaSyBreoBNPlFIrOInJPrcw9Q3j7U0FIAxTMQ'},
+  get gemini(){return localStorage.getItem('fb_g')||''},
   get sheet(){return localStorage.getItem('fb_s')||''},
   set gemini(v){localStorage.setItem('fb_g',v)},
   set sheet(v){localStorage.setItem('fb_s',v)}
@@ -3425,25 +3425,10 @@ function openAIScan(){
 }
 
 async function analysePhotoWithGroq(base64){
-  // Use Gemini 2.0 Flash for vision (Groq doesn't support images yet)
-  const GEMINI_KEY=localStorage.getItem('fb_g')||'AIzaSyBreoBNPlFIrOInJPrcw9Q3j7U0FIAxTMQ';
   const prompt=`Identify each food item in this photo and estimate its nutrition per 100g. Return ONLY a valid JSON array with no markdown or explanation:
 [{"name":"food name","brand":"Generic","qty":100,"per100":{"cal":150,"p":10,"c":20,"f":5},"emoji":"🍽️"}]
 Include 1-8 items. Estimate realistic portion sizes based on what you see.`;
-  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      contents:[{parts:[
-        {text:prompt},
-        {inline_data:{mime_type:'image/jpeg',data:base64}}
-      ]}],
-      generationConfig:{temperature:0.3,maxOutputTokens:800}
-    })
-  });
-  const d=await r.json();
-  if(d.error)throw new Error(d.error.message||JSON.stringify(d.error));
-  const text=d.candidates?.[0]?.content?.parts?.[0]?.text||'[]';
+  const text=await geminiVision(base64,prompt);
   return JSON.parse(text.replace(/```json|```/g,'').trim());
 }
 
@@ -3767,18 +3752,35 @@ function skipSetup(){go('v-auth');}
 /* ═══════════════════════════════════════════
    GEMINI
 ═══════════════════════════════════════════ */
-const GROQ_KEY='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';
-const GROQ_MODEL='llama-3.3-70b-versatile';
+const WORKER_URL='https://groqfb.badhonkarim30.workers.dev/';
+
 async function groqChat(messages,maxTokens=800){
-  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+  const r=await fetch(WORKER_URL,{
     method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
-    body:JSON.stringify({model:GROQ_MODEL,messages,max_tokens:maxTokens,temperature:0.7})
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({provider:'groq',model:'llama-3.3-70b-versatile',messages,max_tokens:maxTokens,temperature:0.7})
   });
   const d=await r.json();
   if(d.error)throw new Error(d.error.message||JSON.stringify(d.error));
   return d.choices[0].message.content;
 }
+
+async function geminiVision(base64,prompt){
+  const r=await fetch(WORKER_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      provider:'gemini',
+      model:'gemini-2.0-flash',
+      contents:[{role:'user',parts:[{text:prompt},{inline_data:{mime_type:'image/jpeg',data:base64}}]}],
+      temperature:0.3
+    })
+  });
+  const d=await r.json();
+  if(d.error)throw new Error(d.error.message||JSON.stringify(d.error));
+  return d.candidates?.[0]?.content?.parts?.[0]?.text||'[]';
+}
+
 async function gemini(p){
   return groqChat([{role:'user',content:p}],1000);
 }
