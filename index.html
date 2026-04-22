@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0d0d0d">
-<title>FitBuddy+</title>
+<title>FitBuddy</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 input,select,textarea{-webkit-user-select:text;user-select:text}
@@ -60,38 +59,7 @@ input[type=number]{-moz-appearance:textfield}
 .g8{height:8px}.g12{height:12px}.g16{height:16px}
 .pbar{height:4px;background:var(--bdr2);border-radius:2px;overflow:hidden}
 .pf{height:100%;background:var(--acc);border-radius:2px;transition:width .4s}
-/* AI COACH CHAT */
-.ai-fab{position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;background:var(--acc);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,229,180,.35);transition:transform .15s,opacity .15s;z-index:10}
-.ai-fab:active{transform:scale(.92)}
-.ai-fab svg{width:20px;height:20px;stroke:#000;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.ai-chat-sheet{background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-width:480px;height:82vh;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom)}
-.ai-chat-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px;border-bottom:1.5px solid var(--bdr);flex-shrink:0}
-.ai-chat-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:var(--t1);display:flex;align-items:center;gap:8px}
-.ai-chat-msgs{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px 8px;display:flex;flex-direction:column;gap:10px}
-.ai-chat-msgs::-webkit-scrollbar{display:none}
-.ai-msg{max-width:82%;padding:10px 13px;border-radius:14px;font-size:14px;line-height:1.55;font-weight:400}
-.ai-msg.user{background:var(--acc);color:#000;align-self:flex-end;border-bottom-right-radius:4px;font-weight:500}
-.ai-msg.ai{background:var(--bg3);color:var(--t1);align-self:flex-start;border-bottom-left-radius:4px;border:1.5px solid var(--bdr)}
-.ai-msg.typing{color:var(--t3);font-style:italic}
-.ai-chat-input-row{display:flex;align-items:flex-end;gap:8px;padding:10px 14px 10px;border-top:1.5px solid var(--bdr);flex-shrink:0;background:var(--bg2)}
-.ai-chat-input{flex:1;background:var(--bg3);border:1.5px solid var(--bdr2);border-radius:20px;padding:10px 14px;color:var(--t1);font-family:'Barlow',sans-serif;font-size:15px;font-weight:400;outline:none;resize:none;max-height:100px;line-height:1.4;-webkit-user-select:text;user-select:text}
-.ai-chat-input:focus{border-color:var(--acc)}
-.ai-send-btn{width:40px;height:40px;border-radius:50%;background:var(--acc);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .15s}
-.ai-send-btn:disabled{opacity:.4}
-.ai-send-btn svg{width:18px;height:18px;stroke:#000;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-#run-map{width:100%;height:260px;border-radius:var(--r);overflow:hidden;background:var(--bg3);z-index:1}
-.run-stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
-.run-stat-grid.three{grid-template-columns:1fr 1fr 1fr}
-.run-stat-box{background:var(--bg2);border:1.5px solid var(--bdr);border-radius:var(--r);padding:14px;text-align:center}
-.run-stat-val{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;color:var(--t1);line-height:1}
-.run-stat-lbl{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-top:4px}
-.run-btn-row{display:flex;gap:10px;margin-top:4px}
-.run-hist-item{background:var(--bg2);border:1.5px solid var(--bdr);border-radius:var(--r);padding:14px;margin-bottom:10px}
-.run-hist-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.run-hist-date{font-size:13px;font-weight:600;color:var(--t3)}
-.run-hist-dist{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--acc)}
-.run-hist-stats{display:flex;gap:16px}
-.run-hist-stat{font-size:13px;color:var(--t2)}
+/* BOTTOM NAV */
 .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg2);border-top:1.5px solid var(--bdr);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
 .ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 0;cursor:pointer;border:none;background:none;font-family:'Barlow',sans-serif;font-size:11px;font-weight:600;color:var(--t3);transition:color .2s;text-transform:uppercase;letter-spacing:.04em}
 .ni.on{color:var(--acc)}
@@ -588,9 +556,6 @@ body.light .bc-view{background:var(--bg)}
 body.light .bc-vid-wrap{background:var(--bg3)}
 
 </style>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 <script>(function(){if(localStorage.getItem('fb_theme')==='light'){document.body.classList.add('light');document.documentElement.classList.add('light');}})();</script>
@@ -638,58 +603,45 @@ body.light .bc-vid-wrap{background:var(--bg3)}
 <!-- VIEW: SPLASH -->
 <div id="v-spl" class="view A">
   <div class="spl">
-    <div class="slogo">FITBUDDY+</div>
+    <div class="slogo">FITBUDDY</div>
     <div class="ssub">Your Family Fitness Partner</div>
     <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
   </div>
 </div>
 
-<!-- VIEW: AUTH (Login / Register) -->
-<div id="v-auth" class="view">
-  <div class="scr" style="padding-top:48px">
-    <div style="text-align:center;margin-bottom:36px">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:800;color:var(--acc);letter-spacing:.1em">FITBUDDY+</div>
-      <div style="font-size:15px;font-weight:500;color:var(--t3);margin-top:6px">Your personal fitness tracker</div>
+<!-- VIEW: SETUP -->
+<div id="v-setup" class="view">
+  <div class="scr">
+    <div style="text-align:center;padding:32px 0 24px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:800;color:var(--acc);letter-spacing:.1em">FITBUDDY</div>
+      <div style="font-size:16px;font-weight:500;color:var(--t3);margin-top:6px">First-time setup</div>
     </div>
-    <!-- Tab toggle -->
-    <div style="display:flex;background:var(--bg3);border-radius:var(--rs);padding:3px;gap:2px;margin-bottom:24px">
-      <button id="auth-tab-login"  onclick="authTab('login')"    style="flex:1;height:40px;border:none;border-radius:8px;font-family:'Barlow',sans-serif;font-size:15px;font-weight:700;cursor:pointer;background:var(--acc);color:#000;transition:all .2s">Sign in</button>
-      <button id="auth-tab-reg"    onclick="authTab('register')" style="flex:1;height:40px;border:none;border-radius:8px;font-family:'Barlow',sans-serif;font-size:15px;font-weight:700;cursor:pointer;background:transparent;color:var(--t3);transition:all .2s">Register</button>
+    <div class="card">
+      <div class="ctit">Gemini AI — Free API Key</div>
+      <div class="ibox"><p>Get your free key at <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a> → Get API key. Free 1,500 requests/day for food recommendations.</p></div>
+      <div class="field"><label>Gemini API key</label><input type="password" id="s-gemini" placeholder="AIzaSy..."></div>
     </div>
-    <!-- Login form -->
-    <div id="auth-login-form">
-      <div class="field"><label>Email</label><input type="email" id="auth-email-l" placeholder="you@email.com" autocomplete="email"></div>
-      <div class="field"><label>Password</label><div style="position:relative"><input type="password" id="auth-pass-l" placeholder="Your password" autocomplete="current-password" style="padding-right:46px"><button type="button" onclick="togglePwd('auth-pass-l',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--t3)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
-      <button class="btn bp mt8" onclick="doLogin()">Sign in</button>
-      <div style="text-align:center;margin-top:14px">
-        <button onclick="doForgotPass()" style="background:none;border:none;color:var(--acc);font-size:14px;font-weight:600;cursor:pointer;font-family:'Barlow',sans-serif">Forgot password?</button>
-      </div>
+    <div class="card">
+      <div class="ctit">Google Sheets — Shared Storage</div>
+      <div class="ibox"><p>Lets all family members access data from <strong style="color:var(--t1)">any device</strong>. Set up the Apps Script backend, then paste the URL here.</p></div>
+      <div class="field"><label>Apps Script web app URL</label><input type="url" id="s-sheet" placeholder="https://script.google.com/macros/s/..."></div>
+      <div class="wbox"><p>No sheet yet? Use local storage — data stays on this device. Add the URL in Settings later.</p></div>
     </div>
-    <!-- Register form -->
-    <div id="auth-reg-form" style="display:none">
-      <div class="field"><label>Email</label><input type="email" id="auth-email-r" placeholder="you@email.com" autocomplete="email"></div>
-      <div class="field"><label>Password</label><div style="position:relative"><input type="password" id="auth-pass-r" placeholder="Min. 6 characters" autocomplete="new-password" style="padding-right:46px"><button type="button" onclick="togglePwd('auth-pass-r',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--t3)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
-      <div class="field"><label>Confirm password</label><div style="position:relative"><input type="password" id="auth-pass-r2" placeholder="Repeat password" autocomplete="new-password" style="padding-right:46px"><button type="button" onclick="togglePwd('auth-pass-r2',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--t3)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
-      <button class="btn bp mt8" onclick="doRegister()">Create account</button>
-    </div>
-    <div id="auth-err" style="color:var(--err);font-size:14px;font-weight:600;text-align:center;margin-top:14px;display:none"></div>
-    <!-- Gemini key (optional) -->
-    <div class="card mt16" style="margin-top:24px">
-      <div style="font-size:13px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Gemini AI (optional)</div>
-      <div class="ibox" style="margin-bottom:10px"><p>For AI food scanning &amp; AI Coach. Free key at <a href="https://aistudio.google.com" target="_blank">aistudio.google.com</a></p></div>
-      <input type="password" id="auth-gemini" placeholder="AIzaSy..." value="${localStorage.getItem('fb_g')||''}">
-    </div>
+    <button class="btn bp" onclick="doSetup()">Save and continue</button>
+    <div class="g12"></div>
+    <button class="btn bg" onclick="skipSetup()">Continue with local storage</button>
+    <div class="g16"></div>
   </div>
 </div>
 
 <!-- VIEW: PROFILES -->
 <div id="v-prof" class="view">
   <div style="padding:32px 16px 8px;text-align:center">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:800;color:var(--acc);letter-spacing:.1em">FITBUDDY+</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:800;color:var(--acc);letter-spacing:.1em">FITBUDDY</div>
     <div style="font-size:16px;font-weight:600;color:var(--t2);margin-top:8px">Who's training today?</div>
   </div>
   <div id="pgrid" class="pgrid"></div>
-  <div style="padding:0 16px 24px"></div>
+  <div style="padding:0 16px 24px"><button class="btn bg bsm" onclick="go('v-setup')" style="width:100%;font-size:14px;color:var(--t3)">App settings</button></div>
 </div>
 
 <!-- VIEW: ONBOARDING -->
@@ -736,6 +688,7 @@ body.light .bc-vid-wrap{background:var(--bg3)}
       <span class="sbt-ex" id="sbt-ex"></span>
     </div>
     <div class="sbt-num" id="sbt-num">2:00</div>
+    <div class="pbar" style="margin:6px 0"><div id="sbt-pbar" class="pf" style="width:100%"></div></div>
     <div class="sbt-btns">
       <button class="sbt-btn sbt-minus" onclick="addTime(-15)">−15s</button>
       <button class="sbt-btn sbt-skip"  onclick="skipTimer()">Skip</button>
@@ -769,7 +722,6 @@ body.light .bc-vid-wrap{background:var(--bg3)}
   <div id="t-workout"  class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden"></div>
   <div id="t-progress" class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden"></div>
   <div id="t-food"     class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden"></div>
-  <div id="t-run"      class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden"></div>
   <div id="t-profile"  class="tab" style="display:none;flex-direction:column;flex:1;overflow:hidden"></div>
   <nav class="bnav">
     <button class="ni on" data-t="home" onclick="tab('home')">
@@ -777,9 +729,6 @@ body.light .bc-vid-wrap{background:var(--bg3)}
     </button>
     <button class="ni" data-t="workout" onclick="tab('workout')">
       <svg viewBox="0 0 24 24"><line x1="6" y1="5" x2="6" y2="19"/><line x1="18" y1="5" x2="18" y2="19"/><line x1="1" y1="12" x2="23" y2="12"/><line x1="6" y1="8" x2="10" y2="8"/><line x1="14" y1="8" x2="18" y2="8"/></svg>Workout
-    </button>
-    <button class="ni" data-t="run" onclick="tab('run')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="17" cy="4" r="1.5"/><path d="M11 17.5l1.5-4.5 2.5 2.5"/><path d="M6 11.5l3.5-1 2 3 3.5-1.5"/><path d="M15.5 10l-2-3-4.5 1"/></svg>Run
     </button>
     <button class="ni" data-t="progress" onclick="tab('progress')">
       <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Progress
@@ -801,20 +750,6 @@ body.light .bc-vid-wrap{background:var(--bg3)}
 /* ── UNIT CONVERSION HELPERS ── */
 function wu(){return localStorage.getItem('fb_wunit')||'kg';}
 function mu(){return localStorage.getItem('fb_munit')||'cm';}
-function du(){return localStorage.getItem('fb_dunit')||'km';}
-function distVal(m){return du()==='mi'?Math.round(m/1609.34*100)/100:Math.round(m/10)/100;}
-function distStr(m){return distVal(m).toFixed(2)+' '+du();}
-function paceStr(distM,durSec){
-  if(!distM||!durSec)return'—';
-  const perUnit=du()==='mi'?(durSec/60)/(distM/1609.34):(durSec/60)/(distM/1000);
-  const mn=Math.floor(perUnit),s=Math.round((perUnit-mn)*60);
-  return`${mn}:${s<10?'0'+s:s}`;
-}
-function spdStr(mps){
-  if(!mps)return'0.0';
-  return du()==='mi'?(mps*2.237).toFixed(1):(mps*3.6).toFixed(1);
-}
-function spdUnit(){return du()==='mi'?'mph':'km/h';}
 function dispWt(kg){if(!kg&&kg!==0)return '—';return wu()==='lbs'?Math.round(+kg*2.2046*10)/10:+kg;}
 function dispWtU(){return wu();}
 function dispMeas(cm){if(!cm&&cm!==0)return '—';return mu()==='in'?Math.round(+cm/2.54*10)/10:+cm;}
@@ -1198,187 +1133,20 @@ function calcMacros(cals,w,bf){
 function bfCat(bf,g){const cats=g==='female'?BFF:BFM;return cats.find(c=>bf>=c.lo&&bf<=c.hi)||cats[cats.length-1];}
 
 /* ═══════════════════════════════════════════
-   FIREBASE INIT
+   STORAGE
 ═══════════════════════════════════════════ */
-const _fbConfig={
-  apiKey:"AIzaSyB-vA91NqKKqiUi3M98vnnzFA7AibXvgQQ",
-  authDomain:"fitbuddy-plus.firebaseapp.com",
-  projectId:"fitbuddy-plus",
-  storageBucket:"fitbuddy-plus.firebasestorage.app",
-  messagingSenderId:"59476078641",
-  appId:"1:59476078641:web:625032ae6928a7284ca510"
-};
-let _fbApp,_fbAuth,_fbDb,_fbUid=null;
-function fbInit(){
-  if(_fbApp)return;
-  _fbApp=firebase.initializeApp(_fbConfig);
-  _fbAuth=firebase.auth();
-  _fbDb=firebase.firestore();
-  // Note: persistence disabled — avoids IndexedDB conflicts that cause silent hangs
-}
-
-/* ═══════════════════════════════════════════
-   AUTH FUNCTIONS
-═══════════════════════════════════════════ */
-function togglePwd(id,btn){
-  const inp=document.getElementById(id);
-  if(!inp)return;
-  const show=inp.type==='password';
-  inp.type=show?'text':'password';
-  btn.style.color=show?'var(--acc)':'var(--t3)';
-  btn.innerHTML=show
-    ?`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
-    :`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
-}
-function authTab(t){
-  const isLogin=t==='login';
-  document.getElementById('auth-login-form').style.display=isLogin?'block':'none';
-  document.getElementById('auth-reg-form').style.display=isLogin?'none':'block';
-  document.getElementById('auth-tab-login').style.background=isLogin?'var(--acc)':'transparent';
-  document.getElementById('auth-tab-login').style.color=isLogin?'#000':'var(--t3)';
-  document.getElementById('auth-tab-reg').style.background=isLogin?'transparent':'var(--acc)';
-  document.getElementById('auth-tab-reg').style.color=isLogin?'var(--t3)':'#000';
-  document.getElementById('auth-err').style.display='none';
-}
-function _authErr(msg){
-  const el=document.getElementById('auth-err');
-  if(el){el.textContent=msg;el.style.display='block';}
-}
-function _saveGeminiFromAuth(){
-  const v=document.getElementById('auth-gemini')?.value?.trim();
-  if(v)localStorage.setItem('fb_g',v);
-}
-async function doLogin(){
-  const email=document.getElementById('auth-email-l')?.value?.trim();
-  const pass=document.getElementById('auth-pass-l')?.value;
-  if(!email||!pass){_authErr('Please fill all fields');return;}
+async function api(action,p={}){
+  if(!CFG.sheet)return ldb(action,p);
   try{
-    _saveGeminiFromAuth();
-    await _fbAuth.signInWithEmailAndPassword(email,pass);
-  }catch(e){
-    _authErr(
-      e.code==='auth/wrong-password'||e.code==='auth/user-not-found'||e.code==='auth/invalid-credential'
-        ?'Wrong email or password — use Forgot password to reset'
-        :e.message
-    );
-  }
+    const ctrl=new AbortController();
+    const t=setTimeout(()=>ctrl.abort(),5000);
+    const r=await fetch(CFG.sheet,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action,...p}),signal:ctrl.signal});
+    clearTimeout(t);
+    return await r.json();
+  }catch(e){return ldb(action,p);}
 }
-async function doRegister(){
-  const email=document.getElementById('auth-email-r')?.value?.trim();
-  const pass=document.getElementById('auth-pass-r')?.value;
-  const pass2=document.getElementById('auth-pass-r2')?.value;
-  if(!email||!pass||!pass2){_authErr('Please fill all fields');return;}
-  if(pass!==pass2){_authErr('Passwords do not match');return;}
-  if(pass.length<6){_authErr('Password must be at least 6 characters');return;}
-  try{
-    _saveGeminiFromAuth();
-    const cred=await _fbAuth.createUserWithEmailAndPassword(email,pass);
-    // Send verification email
-    try{await cred.user.sendEmailVerification();}catch(e){}
-    toast('Account created! Check your email to verify 📧','ok');
-  }catch(e){
-    _authErr(e.code==='auth/email-already-in-use'?'An account with this email already exists':e.message);
-  }
-}
-async function doForgotPass(){
-  const email=document.getElementById('auth-email-l')?.value?.trim();
-  if(!email){_authErr('Enter your email first');return;}
-  try{
-    await _fbAuth.sendPasswordResetEmail(email);
-    _authErr('');
-    toast('Reset email sent — check your inbox','ok');
-  }catch(e){_authErr(e.message);}
-}
-async function doSignOut(){
-  if(!confirm('Sign out of FitBuddy+?'))return;
-  await _fbAuth.signOut();
-  S.user=null;S.users=[];S.logs=[];S.meas=[];
-  go('v-auth');
-}
-
-/* ═══════════════════════════════════════════
-   FIRESTORE STORAGE
-═══════════════════════════════════════════ */
 const lg=(k)=>{try{return JSON.parse(localStorage.getItem('fb_'+k)||'[]')}catch(e){return[]}};
 const ls=(k,v)=>localStorage.setItem('fb_'+k,JSON.stringify(v));
-
-function _uref(){return _fbDb.collection('users').doc(_fbUid);}
-
-async function fsGetUser(){
-  try{
-    const doc=await _uref().get();
-    if(doc.exists){const d=doc.data();ls('u',[d]);return d;}
-    return null;
-  }catch(e){const arr=lg('u');return arr[0]||null;}
-}
-async function fsSaveUser(user){
-  try{await _uref().set(user,{merge:true});}catch(e){}
-  ls('u',[user]);
-}
-async function fsDelUser(){
-  try{
-    const batch=_fbDb.batch();
-    batch.delete(_uref());
-    // sub-collections need separate deletion
-    const [logs,meas]=await Promise.all([
-      _uref().collection('logs').get(),
-      _uref().collection('meas').get()
-    ]);
-    logs.forEach(d=>batch.delete(d.ref));
-    meas.forEach(d=>batch.delete(d.ref));
-    await batch.commit();
-  }catch(e){}
-  ls('u',[]);ls('lg'+(_fbUid||''),[]);ls('ms'+(_fbUid||''),[]);
-}
-async function fsGetLogs(){
-  try{
-    const snap=await _uref().collection('logs').orderBy('date','desc').limit(200).get();
-    const data=snap.docs.map(d=>d.data());
-    ls('lg'+(_fbUid||''),data);
-    return data;
-  }catch(e){return lg('lg'+(_fbUid||''));}
-}
-async function fsSaveLog(log){
-  try{await _uref().collection('logs').doc(log.id).set(log);}catch(e){}
-  const arr=lg('lg'+(_fbUid||''));arr.push(log);ls('lg'+(_fbUid||''),arr);
-}
-async function fsGetMeas(){
-  try{
-    const snap=await _uref().collection('meas').orderBy('date','desc').limit(200).get();
-    const data=snap.docs.map(d=>d.data());
-    ls('ms'+(_fbUid||''),data);
-    return data;
-  }catch(e){return lg('ms'+(_fbUid||''));}
-}
-async function fsSaveMeas(m){
-  try{await _uref().collection('meas').doc(m.id).set(m);}catch(e){}
-  const arr=lg('ms'+(_fbUid||''));arr.push(m);ls('ms'+(_fbUid||''),arr);
-}
-async function fsGetRuns(){
-  try{
-    const snap=await _uref().collection('runs').orderBy('date','desc').limit(100).get();
-    const data=snap.docs.map(d=>d.data());
-    ls('runs_'+(_fbUid||''),data);
-    return data;
-  }catch(e){return lg('runs_'+(_fbUid||''));}
-}
-async function fsSaveRun(run){
-  try{await _uref().collection('runs').doc(run.id).set(run);}catch(e){}
-  const arr=lg('runs_'+(_fbUid||''));arr.push(run);ls('runs_'+(_fbUid||''),arr);
-}
-
-// Replace old api() shim — maps old calls to Firebase
-async function api(action,p={}){
-  if(!_fbUid) return ldb(action,p); // not logged in → local fallback
-  if(action==='getUsers'){const u=await fsGetUser();return{data:u?[u]:[]};}
-  if(action==='saveUser'){await fsSaveUser(p.user);return{ok:1};}
-  if(action==='delUser'){await fsDelUser();return{ok:1};}
-  if(action==='getLogs'){const d=await fsGetLogs();return{data:d};}
-  if(action==='saveLog'){await fsSaveLog(p.log);return{ok:1};}
-  if(action==='getMeas'){const d=await fsGetMeas();return{data:d};}
-  if(action==='saveMeas'){await fsSaveMeas(p.m);return{ok:1};}
-  return{err:'unknown'};
-}
 function ldb(a,p){
   if(a==='getUsers')  return{data:lg('u')};
   if(a==='saveUser'){ const u=lg('u');const i=u.findIndex(x=>x.id===p.user.id);if(i>=0)u[i]=p.user;else u.push(p.user);ls('u',u);return{ok:1};}
@@ -1405,32 +1173,6 @@ function buildDefaultWorkoutsAndPlan(user){
   const eq  = user.equip||'gym';
   const dpw = Math.min(parseInt(user.dpw)||4, 6);
   const eqKey = eq==='gym'?'gym':eq==='bands'?'bands':'bw';
-  const exp = user.exp||'intermediate';
-
-  // ── Experience-based exclusion lists ──────────────────
-  const BEGINNER_EXCLUDE = new Set([
-    // Barbell compounds — high technique, injury risk for beginners
-    'Barbell Bench Press','Barbell Back Squat','Barbell Back Squat Progression',
-    'Front Squat','Zercher Squat','Belt Squat','Barbell Deadlift','Barbell Deadlift Progression',
-    'Sumo Deadlift (lower back friendly)','Trap Bar Deadlift (lower back friendly)',
-    'Barbell Romanian Deadlift','Barbell Hip Thrust','Barbell Hip Thrust Progression',
-    'Smith Machine Hip Thrust','Barbell Row (Lat Focused)','Barbell Row (mid/upper back focused)',
-    'Military Press','Standing Barbell Overhead Press','Close-Grip Barbell Bench Press',
-    'JM Press','Preacher Curl (Barbell)','Standing Barbell Curl','T-Bar Row','Meadows Row',
-    'Nordic Hamstring Curl','Glute Ham Raise','Pendulum Squat','Hack Squat Machine',
-    'Low Incline Barbell Press','Incline Barbell Skullcrushers','Barbell Good Mornings',
-    'Arnold Press','Barbell Shrugs','Pistol Squat','Kettlebell Swing',
-  ]);
-  const INTERMEDIATE_EXCLUDE = new Set([
-    // Keep advanced-only variations out for intermediates
-    'Pendulum Squat','Belt Squat','Zercher Squat','Nordic Hamstring Curl',
-    'Glute Ham Raise','Pistol Squat',
-  ]);
-  function allowedForExp(name){
-    if(exp==='beginner') return !BEGINNER_EXCLUDE.has(name);
-    if(exp==='intermediate') return !INTERMEDIATE_EXCLUDE.has(name);
-    return true; // advanced — full pool
-  }
   const colors = ['#00e5b4','#4d9fff','#a78bfa','#fbbf24','#ff6b35'];
   const emojis = ['💪','🔥','🦵','⚡','🎯'];
 
@@ -1497,7 +1239,8 @@ function buildDefaultWorkoutsAndPlan(user){
 
   // Pick first available exercise from a zone pool
   function pickFromPool(pool){
-    const arr = (pool[eqKey] || pool.bw || []).filter(allowedForExp);
+    const arr = pool[eqKey] || pool.bw || [];
+    // Shuffle after first item for variety
     const candidates = arr.slice(0,1).concat(arr.slice(1).sort(()=>Math.random()-.5));
     return candidates[0] || null;
   }
@@ -1590,7 +1333,7 @@ function buildDefaultWorkoutsAndPlan(user){
 
     // Per muscle, pick best exercises avoiding duplicate patterns
     muscleGroups.forEach(muscle=>{
-      const pool = (DB[muscle]?.[eqKey] || DB[muscle]?.bw || []).filter(allowedForExp).slice();
+      const pool = (DB[muscle]?.[eqKey] || DB[muscle]?.bw || []).slice();
       const candidates = pool.slice(0,2).concat(pool.slice(2).sort(()=>Math.random()-.5));
       let added = 0;
       const maxPerMuscle = muscleGroups.length <= 2 ? 3 : muscleGroups.length <= 3 ? 2 : 1;
@@ -1851,51 +1594,18 @@ function exTips(name,muscle){
    INIT
 ═══════════════════════════════════════════ */
 window.addEventListener('load',async()=>{
-  fbInit();
-  // Show splash while Firebase checks auth state
-  go('v-spl');
-  // Failsafe: if auth doesn't resolve in 8s, go to auth screen
-  const authTimeout=setTimeout(()=>{
-    if(document.getElementById('v-spl')?.classList.contains('A')){
-      go('v-auth');
-    }
-  },8000);
-  _fbAuth.onAuthStateChanged(async(fbUser)=>{
-    clearTimeout(authTimeout);
-    if(!fbUser){
-      go('v-auth');
-      return;
-    }
-    _fbUid=fbUser.uid;
-    try{
-      await loadAll();
-      if(S.users.length>0){
-        await selUser(S.users[0].id);
-      }else{
-        // New user — check if they have local data to migrate
-        const localUsers=lg('u');
-        if(localUsers.length>0){
-          toast('Migrating your data to cloud…','ok');
-          const u=localUsers[0];
-          u.firebaseUid=fbUser.uid;
-          await fsSaveUser(u);
-          const localLogs=lg('lg'+u.id);
-          const localMeas=lg('ms'+u.id);
-          for(const l of localLogs){try{await _uref().collection('logs').doc(l.id).set(l);}catch(e){}}
-          for(const m of localMeas){try{await _uref().collection('meas').doc(m.id).set(m);}catch(e){}}
-          await selUser(u.id);
-        }else{
-          startOb();
-        }
-      }
-    }catch(e){
-      console.error('Init error:',e);
-      try{
-        if(S.users.length>0)await selUser(S.users[0].id);
-        else startOb();
-      }catch(e2){startOb();}
-    }
-  });
+  try{
+    await sleep(900);
+    if(!CFG.gemini&&!CFG.sheet&&!localStorage.getItem('fb_l')){go('v-setup');return;}
+    await loadAll();
+    renderProfs();
+    go('v-prof');
+  }catch(e){
+    console.error('Init error:',e);
+    // Always get user out of splash even if something fails
+    try{renderProfs();}catch(e2){}
+    go('v-prof');
+  }
 });
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 
@@ -1908,7 +1618,7 @@ function tab(name){
   const el=document.getElementById('t-'+name);
   el.style.display='flex';el.style.flexDirection='column';
   document.querySelectorAll('.ni').forEach(b=>b.classList.toggle('on',b.dataset.t===name));
-  ({home:rHome,workout:rWorkout,progress:rProgress,food:rFood,profile:rProTab,run:rRun})[name]?.();
+  ({home:rHome,workout:rWorkout,progress:rProgress,food:rFood,profile:rProTab})[name]?.();
   go('v-app');
 }
 
@@ -1931,7 +1641,6 @@ async function selUser(id){
     await api('saveUser',{user:S.user});
   }
   S.workouts=S.user.workouts;S.weekPlan=S.user.weekPlan;S.food=null;
-  syncCommunityFoods().catch(()=>{});
   // Sync YT IDs from saved exercises into YT dict
   S.workouts.forEach(wk=>wk.exercises.forEach(ex=>{if(ex.ytId)YT[ex.name]=ex.ytId;}));
   tab('home');
@@ -1955,15 +1664,10 @@ function rHome(){
   const doneCount=(workedOut?1:0)+(weighedIn?1:0);
 
   let h=buildWeekStrip();
-  h+=`<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:20px 16px 0">
-    <div>
-      <div class="greet-hi">${hr<12?'Good morning':'Good afternoon'},</div>
-      <div class="greet-name">${u.name.toUpperCase()}</div>
-      <div class="greet-date">${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}</div>
-    </div>
-    <button onclick="openAIChat()" style="background:var(--acc);border:none;border-radius:50%;width:42px;height:42px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:4px;box-shadow:0 2px 10px rgba(0,229,180,.3)" title="AI Coach">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><circle cx="9" cy="10" r="1" fill="#000"/><circle cx="12" cy="10" r="1" fill="#000"/><circle cx="15" cy="10" r="1" fill="#000"/></svg>
-    </button>
+  h+=`<div class="greeting">
+    <div class="greet-hi">${hr<12?'Good morning':'Good afternoon'},</div>
+    <div class="greet-name">${u.name.toUpperCase()}</div>
+    <div class="greet-date">${new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}</div>
   </div>
   <div style="padding:16px 16px 0">
     <div class="checklist-hd">
@@ -2253,7 +1957,7 @@ function assignWorkout(wkId){if(_assignDayIdx===null)return;S.weekPlan[_assignDa
 ═══════════════════════════════════════════ */
 function openBuilder(wkId){
   if(wkId){const wk=getWorkout(wkId);if(!wk)return;S.builder={wkId,name:wk.name,color:wk.color,exercises:JSON.parse(JSON.stringify(wk.exercises)),catFilter:'All'};}
-  else{S.builder={wkId:null,name:'',color:'#00e5b4',exercises:[],catFilter:'All'};}
+  else{S.builder={wkId:null,name:'',color:WK_COLORS[0],exercises:[],catFilter:'All'};}
   renderBuilder();go('v-builder');
 }
 function renderBuilder(){
@@ -2378,8 +2082,8 @@ function sessExCard(ex,idx){
     rows+=`<tr>
       <td><span class="sn">S${si+1}</span></td>
       <td><div class="pvc${!prev[si]?' none':''}">${pTxt}</div></td>
-      <td>${pbBadge}<input class="si${done?' done':''}" type="number" min="1" max="99" placeholder="—" value="${s.r}" oninput="sv(${idx},${si},'r',this.value)" onblur="sv(${idx},${si},'r',this.value)"></td>
-      <td><input class="si${done?' done':''}" type="number" min="0" step=".5" placeholder="—" value="${s.k}" oninput="sv(${idx},${si},'k',this.value)" onblur="sv(${idx},${si},'k',this.value)"></td>
+      <td>${pbBadge}<input class="si${done?' done':''}" type="number" min="1" max="99" placeholder="—" value="${s.r}" oninput="sv(${idx},${si},'r',this.value)"></td>
+      <td><input class="si${done?' done':''}" type="number" min="0" step=".5" placeholder="—" value="${s.k}" oninput="sv(${idx},${si},'k',this.value)"></td>
     </tr>`;
   });
 
@@ -2432,8 +2136,6 @@ function openExMenu(idx, btn){
   const rect = btn.getBoundingClientRect();
 
   const items = [
-    {icon:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',
-      label:'Reps &amp; Sets', fn:`openRepsModal(${idx})`},
     {icon:'<polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/>',
       label:'Swap exercise', fn:`swapExInSession(${idx})`},
     {icon:'<polygon points="5 3 19 12 5 21 5 3"/>',
@@ -2509,7 +2211,6 @@ function sv(ei,si,f,val){
     }
   }
   if(f==='k'&&val&&s.r)startTimer(S.sess.exercises[ei].rest||(parseInt(localStorage.getItem('fb_resttime'))||120),S.sess.exercises[ei].name);
-  if(f==='r'&&val&&s.k)startTimer(S.sess.exercises[ei].rest||(parseInt(localStorage.getItem('fb_resttime'))||120),S.sess.exercises[ei].name);
   // Update today's ring in real time
   updateTodayRing();
 }
@@ -2588,26 +2289,19 @@ function updT(){
 }
 function timerDone(){
   stopTimer();
-  // Vibrate — longer pattern so wearables register it too
-  if(navigator.vibrate && localStorage.getItem('fb_vib')!=='0'){
-    navigator.vibrate([400,100,400,100,400,100,600]);
+  // Vibrate: 3 short pulses
+  if(navigator.vibrate && localStorage.getItem('fb_vib')!=='0') navigator.vibrate([300,100,300,100,300]);
+  // Push notification if page is hidden
+  if(document.hidden && 'Notification' in window && Notification.permission==='granted'){
+    new Notification('Rest over!', {
+      body: S.tmr.name ? `Time to hit ${S.tmr.name}` : 'Get back to your workout!',
+      icon: '/favicon.ico',
+      silent: false
+    });
   }
-  // Notification — always fire if permission granted (wearables mirror phone notifications)
-  if('Notification' in window && Notification.permission==='granted'){
-    try{
-      new Notification('⏱ Rest over — go! 💪', {
-        body: S.tmr.name ? `Next up: ${S.tmr.name}` : 'Get back to your workout!',
-        icon: '/fitbuddy/icon-192.png',
-        silent: false,
-        vibrate: [400,100,400,100,600]
-      });
-    }catch(e){}
-  }
-  // In-app flash
+  // In-app flash on timer
   const tn=document.getElementById('tnum');
-  if(tn){ tn.textContent='GO!'; tn.style.color='var(--ok)'; setTimeout(()=>{ tn.textContent='0:00'; tn.style.color=''; },2000); }
-  const stn=document.getElementById('sbt-num');
-  if(stn){ stn.textContent='GO!'; stn.style.color='var(--ok)'; setTimeout(()=>{ stn.style.color=''; },2000); }
+  if(tn){ tn.textContent='GO!'; tn.style.color='var(--ok)'; setTimeout(()=>{ tn.style.color=''; },1500); }
   toast('Rest over — go! 💪','ok');
 }
 function stopTimer(){
@@ -2668,69 +2362,7 @@ function rProgress(){
     ${sorted.length>1?lineChart(sorted.map(m=>({x:m.date.slice(5),y:+m.wt||0})),'#fbbf24'):'<div style="text-align:center;padding:16px 0;font-size:14px;color:var(--t3)">Add more measurements to see trend</div>'}</div>`;
   if(sorted.length){h+=`<div class="card"><div class="ctit">History</div>`;[...sorted].reverse().slice(0,10).forEach(m=>{h+=`<div class="mlog"><span class="mlogd">${fmtDate(m.date)}</span><div class="mlogv">${m.wt}kg · ${m.bf||'—'}% BF<br><span style="color:var(--t3);font-size:13px">${m.cals||'—'} kcal target</span></div></div>`;});h+=`</div>`;}
   h+=`<div id="mfm"></div>`;
-
-  // ── WORKOUT HISTORY ──
-  const logs=[...S.logs].sort((a,b)=>b.date.localeCompare(a.date));
-  h+=`<div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 10px">
-    <h2 style="font-size:22px;font-weight:700">Workout history</h2>
-    <span style="font-size:13px;color:var(--t3)">${logs.length} session${logs.length!==1?'s':''}</span>
-  </div>`;
-
-  if(!logs.length){
-    h+=`<div class="card" style="text-align:center;padding:28px 16px">
-      <div style="font-size:32px;margin-bottom:8px">🏋️</div>
-      <div style="font-size:15px;font-weight:600;color:var(--t2);margin-bottom:4px">No workouts yet</div>
-      <div style="font-size:14px;color:var(--t3)">Complete a session and it will appear here</div>
-    </div>`;
-  } else {
-    logs.forEach((log,li)=>{
-      const totalSets=log.exercises?.reduce((a,e)=>a+(e.sets?.length||0),0)||0;
-      const totalVol=log.exercises?.reduce((a,e)=>a+(e.sets?.reduce((sa,s)=>(+s.r||0)*(+s.k||0)+sa,0)||0),0)||0;
-      const muscles=[...new Set(log.exercises?.map(e=>DB[e.muscle]?.label||e.muscle)||[])].slice(0,3).join(', ');
-      h+=`<div class="card" style="margin-bottom:10px">
-        <div onclick="toggleHistLog('hl${li}')" style="cursor:pointer">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-            <div>
-              <div style="font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;color:var(--t1)">${log.wkName||'Workout'}</div>
-              <div style="font-size:13px;color:var(--t3);margin-top:2px">${fmtDate(log.date)} · ${muscles}</div>
-            </div>
-            <svg id="hl${li}-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--t3)" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0;margin-top:2px;transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-          <div style="display:flex;gap:16px">
-            <div style="font-size:13px;color:var(--t2)">💪 <strong>${log.exercises?.length||0}</strong> exercises</div>
-            <div style="font-size:13px;color:var(--t2)">📋 <strong>${totalSets}</strong> sets</div>
-            ${totalVol>0?`<div style="font-size:13px;color:var(--t2)">🏋️ <strong>${totalVol.toFixed(0)}</strong> ${wu()} vol</div>`:''}
-          </div>
-        </div>
-        <div id="hl${li}" style="display:none;margin-top:12px;border-top:1.5px solid var(--bdr);padding-top:12px">
-          ${(log.exercises||[]).map(ex=>{
-            const vol=ex.sets?.reduce((a,s)=>(+s.r||0)*(+s.k||0)+a,0)||0;
-            const best=ex.sets?.reduce((b,s)=>+s.k>+b?+s.k:+b,0)||0;
-            return`<div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--bdr)">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-                <div style="font-size:14px;font-weight:700;color:var(--t1)">${ex.name}</div>
-                <span style="font-size:11px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:20px;padding:2px 8px;color:var(--t3)">${DB[ex.muscle]?.label||ex.muscle}</span>
-              </div>
-              <div style="display:flex;gap:10px;flex-wrap:wrap">
-                ${(ex.sets||[]).map((s,si)=>`<div style="background:var(--bg3);border-radius:6px;padding:4px 10px;font-size:13px;font-weight:600;color:var(--t2)">S${si+1}: ${s.r}×${s.k}${wu()}</div>`).join('')}
-              </div>
-              ${vol>0?`<div style="font-size:12px;color:var(--t3);margin-top:5px">Vol: ${vol.toFixed(0)}${wu()} · Best: ${best}${wu()}</div>`:''}
-            </div>`;
-          }).join('')}
-        </div>
-      </div>`;
-    });
-  }
-
   document.getElementById('t-progress').innerHTML=`<div class="scr fin">${h}</div>`;
-}
-function toggleHistLog(id){
-  const el=document.getElementById(id);
-  const arrow=document.getElementById(id+'-arrow');
-  if(!el)return;
-  const open=el.style.display==='none';
-  el.style.display=open?'block':'none';
-  if(arrow)arrow.style.transform=open?'rotate(180deg)':'rotate(0deg)';
 }
 function showMF(){
   const u=S.user;
@@ -2795,17 +2427,17 @@ function rFood(){
     <div class="mac-grid">
       <div class="mpr mpr-p">
         <div class="mpr-lbl">Protein</div>
-        <div class="mpr-val">${(+tots.p).toFixed(1)}g / ${m.p.min}-${m.p.max}g</div>
+        <div class="mpr-val">${tots.p}g / ${m.p.min}-${m.p.max}g</div>
         <div class="mpr-bar"><div class="mpr-fill" style="width:${Math.min(tots.p/Math.max(m.p.max,1)*100,100).toFixed(1)}%"></div></div>
       </div>
       <div class="mpr mpr-c">
         <div class="mpr-lbl">Carbs</div>
-        <div class="mpr-val">${(+tots.c).toFixed(1)}g / ${m.c.min}-${m.c.max}g</div>
+        <div class="mpr-val">${tots.c}g / ${m.c.min}-${m.c.max}g</div>
         <div class="mpr-bar"><div class="mpr-fill" style="width:${Math.min(tots.c/Math.max(m.c.max,1)*100,100).toFixed(1)}%"></div></div>
       </div>
       <div class="mpr mpr-f">
         <div class="mpr-lbl">Fat</div>
-        <div class="mpr-val">${(+tots.f).toFixed(1)}g / ${m.f.min}-${m.f.max}g</div>
+        <div class="mpr-val">${tots.f}g / ${m.f.min}-${m.f.max}g</div>
         <div class="mpr-bar"><div class="mpr-fill" style="width:${Math.min(tots.f/Math.max(m.f.max,1)*100,100).toFixed(1)}%"></div></div>
       </div>
     </div>
@@ -2827,7 +2459,7 @@ function rFood(){
         h+=`<div class="meal-itm">
           <div class="meal-itm-info">
             <div class="meal-itm-name">${item.name}</div>
-            <div class="meal-itm-meta">${item.portionDesc||item.qty+'g'} &middot; ${(+item.p).toFixed(1)}P &middot; ${(+item.c).toFixed(1)}C &middot; ${(+item.f).toFixed(1)}F</div>
+            <div class="meal-itm-meta">${item.portionDesc||item.qty+'g'} &middot; ${item.p}P &middot; ${item.c}C &middot; ${item.f}F</div>
           </div>
           <span class="meal-itm-cal">${item.cal} kcal</span>
           <button class="meal-itm-rm" onclick="removeFoodItem('${meal}',${i})"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -2881,12 +2513,7 @@ function getFoodLog(dateStr){
   catch(e){return{breakfast:[],lunch:[],dinner:[],snacks:[]};}
 }
 function saveFoodLog(dateStr,log){
-  const k='fb_fl_'+(S.user?.id||'x')+'_'+dateStr;
-  localStorage.setItem(k,JSON.stringify(log));
-  // Mirror to Firestore
-  if(_fbUid){
-    try{_uref().collection('food').doc(dateStr).set(log);}catch(e){}
-  }
+  localStorage.setItem('fb_fl_'+(S.user?.id||'x')+'_'+dateStr,JSON.stringify(log));
 }
 function getFoodTotals(log){
   const all=[...(log.breakfast||[]),...(log.lunch||[]),...(log.dinner||[]),...(log.snacks||[])];
@@ -2991,7 +2618,7 @@ async function doFoodSearch(query){
     const [offR,usdaR]=await Promise.allSettled([searchOFF(query),searchUSDA(query)]);
     const off=offR.status==='fulfilled'?offR.value:[];
     const usda=usdaR.status==='fulfilled'?usdaR.value:[];
-    const combined=fuzzyRankFoods([...off,...usda],query).slice(0,20);
+    const api=[...off,...usda].slice(0,20);
 
     let html = '';
 
@@ -3002,9 +2629,9 @@ async function doFoodSearch(query){
     }
 
     // API results
-    if(combined.length){
+    if(api.length){
       html += `<div class="fr-sec">${community.length?'More results':'Results for "'+query+'"'}</div>`;
-      html += combined.map(f=>foodItemHTML(f,false)).join('');
+      html += api.map(f=>foodItemHTML(f,false)).join('');
     }
 
     if(!html){
@@ -3139,9 +2766,9 @@ function updateFdtlMacros(){
   const grid = document.getElementById('fdtl-macgrid');
   if(grid) grid.innerHTML = `
     <div class="fdtl-mac fdtl-cal"><div class="fdtl-mnum">${cal}</div><div class="fdtl-mlbl">Calories</div></div>
-    <div class="fdtl-mac fdtl-pro"><div class="fdtl-mnum">${pro.toFixed(1)}g</div><div class="fdtl-mlbl">Protein</div></div>
-    <div class="fdtl-mac fdtl-crb"><div class="fdtl-mnum">${crb.toFixed(1)}g</div><div class="fdtl-mlbl">Carbs</div></div>
-    <div class="fdtl-mac fdtl-fat"><div class="fdtl-mnum">${fat.toFixed(1)}g</div><div class="fdtl-mlbl">Fat</div></div>`;
+    <div class="fdtl-mac fdtl-pro"><div class="fdtl-mnum">${pro}g</div><div class="fdtl-mlbl">Protein</div></div>
+    <div class="fdtl-mac fdtl-crb"><div class="fdtl-mnum">${crb}g</div><div class="fdtl-mlbl">Carbs</div></div>
+    <div class="fdtl-mac fdtl-fat"><div class="fdtl-mnum">${fat}g</div><div class="fdtl-mlbl">Fat</div></div>`;
 
   // Nutrition facts panel
   const nf = document.getElementById('fdtl-nf');
@@ -3150,9 +2777,9 @@ function updateFdtlMacros(){
     <div class="nf-row"><span class="nf-label">Serving size</span><span class="nf-val">${qty} × ${document.getElementById('fdtl-unit')?.options[document.getElementById('fdtl-unit')?.selectedIndex]?.text || ''}</span></div>
     <div class="nf-row"><span class="nf-label">Total weight</span><span class="nf-val">${Math.round(totalGrams)}g</span></div>
     <div class="nf-row"><span class="nf-label"><strong>Calories</strong></span><span class="nf-val"><strong>${cal}</strong></span></div>
-    <div class="nf-row"><span class="nf-label">Total Fat</span><span class="nf-val">${fat.toFixed(1)}g</span></div>
-    <div class="nf-row"><span class="nf-label">Total Carbs</span><span class="nf-val">${crb.toFixed(1)}g</span></div>
-    <div class="nf-row"><span class="nf-label">Protein</span><span class="nf-val">${pro.toFixed(1)}g</span></div>`;
+    <div class="nf-row"><span class="nf-label">Total Fat</span><span class="nf-val">${fat}g</span></div>
+    <div class="nf-row"><span class="nf-label">Total Carbs</span><span class="nf-val">${crb}g</span></div>
+    <div class="nf-row"><span class="nf-label">Protein</span><span class="nf-val">${pro}g</span></div>`;
 }
 
 function confirmAddFood(){
@@ -3373,26 +3000,18 @@ async function lookupBarcodeAndShow(barcode){
   const el = document.getElementById('fs-results');
   if(el){
     el.innerHTML = `
-      <div style="padding:24px 16px 0;text-align:center">
-        <div style="font-size:36px;margin-bottom:12px">📦</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--t1);margin-bottom:6px">Product not found</div>
-        <div style="font-size:14px;color:var(--t3);margin-bottom:20px">This barcode isn't in our database yet</div>
-        <!-- Barcode display -->
-        <div style="background:var(--bg3);border:1.5px solid var(--bdr2);border-radius:var(--rs);padding:14px 16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between">
-          <div style="text-align:left">
-            <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Barcode</div>
-            <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--acc);letter-spacing:.05em">${barcode}</div>
-          </div>
-          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-            ${[2,5,8,10,13,16,19,22,25,28,31,34,37].map((x,i)=>`<rect x="${x}" y="6" width="${i%3===0?2:1.5}" height="28" fill="var(--t3)" opacity="${i%2===0?1:.5}"/>`).join('')}
-          </svg>
+      <div class="emp" style="padding:28px 16px 16px">
+        <div style="font-size:40px;margin-bottom:12px">🔍</div>
+        <h3>Barcode not found</h3>
+        <p style="margin-bottom:16px">Barcode <strong style="color:var(--t1)">${barcode}</strong> isn't in our database yet.</p>
+        <p>Add it now and every FitBuddy user will be able to find it by scanning this barcode in future.</p>
+      </div>
+      <div class="create-food-btn" onclick="openCreateFood('',${JSON.stringify(barcode)})">
+        <div class="create-food-icon"><svg viewBox="0 0 24 24" fill="none" stroke="var(--blu)" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+        <div>
+          <div class="create-food-label">Add this product</div>
+          <div class="create-food-sub">Help the community — it takes 30 seconds</div>
         </div>
-        <!-- Add button -->
-        <button class="btn bp" style="width:100%;margin-bottom:10px;font-size:17px" onclick="openCreateFood('','${barcode}')">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Add this product
-        </button>
-        <div style="font-size:13px;color:var(--t3);line-height:1.5">Once added, everyone in the FitBuddy+ community can find it by scanning this barcode 🙌</div>
       </div>`;
   }
 }
@@ -3404,6 +3023,7 @@ function lookupManualBarcode(){
 }
 
 function openAIScan(){
+  if(!CFG.gemini){toast('Add a Gemini API key in Settings for AI scanning','warn');return;}
   const input=document.createElement('input');
   input.type='file';input.accept='image/*';input.capture='environment';
   input.onchange=async(e)=>{
@@ -3413,23 +3033,26 @@ function openAIScan(){
     if(resEl)resEl.innerHTML=`<div class="ai-ldg"><div class="ai-ldg-icon">🤖</div><div class="ai-ldg-title">Analysing your meal...</div><div class="ai-ldg-sub">AI is identifying foods and estimating nutrition</div></div>`;
     if(!document.getElementById('v-foodsearch')?.classList.contains('A'))go('v-foodsearch');
     try{
-      const results=await analysePhotoWithGroq(b64);
+      const results=await analysePhotoWithGemini(b64);
       if(!results||!results.length){if(resEl)resEl.innerHTML=`<div class="emp"><h3>Could not identify</h3><p>Try the Describe option instead.</p></div>`;return;}
       if(resEl)resEl.innerHTML=`<div class="fr-sec">AI identified these — tap to add</div>`+results.map(f=>foodItemHTML(f)).join('');
     }catch(err){
-      if(resEl)resEl.innerHTML='';
-      toast('AI scan failed: '+err.message,'err');
+      if(resEl)renderRecentFoods();
+      toast('AI scan failed','err');
     }
   };
   input.click();
 }
 
-async function analysePhotoWithGroq(base64){
-  const prompt=`Identify each food item in this photo and estimate its nutrition per 100g. Return ONLY a valid JSON array with no markdown or explanation:
-[{"name":"food name","brand":"Generic","qty":100,"per100":{"cal":150,"p":10,"c":20,"f":5},"emoji":"🍽️"}]
-Include 1-8 items. Estimate realistic portion sizes based on what you see.`;
-  const text=await geminiVision(base64,prompt);
-  return JSON.parse(text.replace(/```json|```/g,'').trim());
+async function analysePhotoWithGemini(base64){
+  const prompt=`Identify each food in this photo and estimate nutrition. Return ONLY valid JSON array, no markdown: [{"name":"food name","brand":"Generic","qty":100,"per100":{"cal":150,"p":10,"c":20,"f":5},"emoji":"🍽️"}] Include 1-8 items. Estimate realistic portion sizes.`;
+  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CFG.gemini}`,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt},{inline_data:{mime_type:'image/jpeg',data:base64}}]}],generationConfig:{temperature:.3,maxOutputTokens:800}})
+  });
+  const d=await r.json();
+  if(d.error)throw new Error(d.error.message);
+  return JSON.parse(d.candidates[0].content.parts[0].text.replace(/```json|```/g,'').trim());
 }
 
 function openDescribe(){
@@ -3441,13 +3064,14 @@ function openDescribe(){
 async function describeFood(){
   const desc=document.getElementById('describe-in')?.value?.trim();
   if(!desc){toast('Describe what you ate first','err');return;}
+  if(!CFG.gemini){toast('Add a Gemini API key in Settings','warn');return;}
   document.getElementById('describe-result').innerHTML=`<div class="ai-ldg"><div class="ai-ldg-icon">🤖</div><div class="ai-ldg-title">Estimating nutrition...</div></div>`;
   try{
     const prompt=`Estimate nutrition for: "${desc}"
-Return ONLY valid JSON array, no markdown, no explanation:
+Return ONLY valid JSON array, no markdown:
 [{"name":"food","brand":"Generic","qty":150,"per100":{"cal":165,"p":31,"c":0,"f":3.6},"emoji":"🍽️"}]
-1-8 items max. Be realistic with portion sizes.`;
-    const r=await groqChat([{role:'user',content:prompt}],600);
+1-8 items max.`;
+    const r=await gemini(prompt);
     const items=JSON.parse(r.replace(/```json|```/g,'').trim());
     document.getElementById('describe-result').innerHTML=`<div class="fr-sec">Tap each item to add to ${S.fdMeal}</div>`+items.map(f=>foodItemHTML(f)).join('');
   }catch(e){
@@ -3530,7 +3154,6 @@ function rProTab(){
   </div>
   <div class="shd">Training program</div>
   <div class="card">
-    <div class="field"><label>Experience</label><select id="pexp"><option value="beginner" ${u.exp==='beginner'?'selected':''}>🌱 Beginner</option><option value="intermediate" ${(u.exp||'intermediate')==='intermediate'?'selected':''}>💪 Intermediate</option><option value="advanced" ${u.exp==='advanced'?'selected':''}>🔥 Advanced</option></select></div>
     <div class="field"><label>Goal</label><select id="pg">${Object.entries(GOALS).map(([k,v])=>`<option value="${k}" ${u.goal===k?'selected':''}>${v.label}</option>`).join('')}</select></div>
     <div class="field"><label>Equipment</label><select id="peq">${Object.entries(EQL).map(([k,v])=>`<option value="${k}" ${u.equip===k?'selected':''}>${v}</option>`).join('')}</select></div>
     <div class="field"><label>Days per week</label><select id="pd">${[2,3,4,5,6].map(n=>`<option value="${n}" ${u.dpw==n?'selected':''}>${n} days</option>`).join('')}</select></div>
@@ -3538,6 +3161,7 @@ function rProTab(){
   </div>
   <div class="shd">Account</div>
   <div class="card">
+    <button class="btn bg mb8" onclick="go('v-prof');renderProfs()">Switch user</button>
     <button class="btn bd" onclick="confDel()">Delete this profile</button>
   </div>`;
   document.getElementById('t-profile').innerHTML=`<div class="scr">${h}</div>`;
@@ -3554,7 +3178,7 @@ async function saveRC(){
 }
 async function saveProg(){
   const u=S.user;
-  u.goal=gv('pg')||u.goal;u.equip=gv('peq')||u.equip;u.dpw=parseInt(gv('pd'))||u.dpw;u.exp=gv('pexp')||u.exp||'intermediate';
+  u.goal=gv('pg')||u.goal;u.equip=gv('peq')||u.equip;u.dpw=parseInt(gv('pd'))||u.dpw;
   u.cals=calcCals(u.tdee,u.goal);
   const{workouts,weekPlan}=buildDefaultWorkoutsAndPlan(u);
   S.workouts=workouts;S.weekPlan=weekPlan;u.workouts=workouts;u.weekPlan=weekPlan;
@@ -3564,22 +3188,22 @@ async function saveProg(){
 async function confDel(){
   if(!confirm(`Delete ${S.user?.name}'s profile? Cannot be undone.`))return;
   await api('delUser',{id:S.user.id});S.users=S.users.filter(u=>u.id!==S.user.id);S.user=null;
-  startOb();
+  go('v-prof');renderProfs();
 }
 
 /* ═══════════════════════════════════════════
    ONBOARDING
 ═══════════════════════════════════════════ */
 function startOb(){S.ob={step:1,d:{}};rObStep();go('v-ob');}
-function obBack(){if(S.ob.step===1){return;}S.ob.step--;rObStep();}
-function obAdv(x={}){Object.assign(S.ob.d,x);if(S.ob.step>=9){finOb();return;}S.ob.step++;rObStep();}
+function obBack(){if(S.ob.step===1){go('v-prof');return;}S.ob.step--;rObStep();}
+function obAdv(x={}){Object.assign(S.ob.d,x);if(S.ob.step>=8){finOb();return;}S.ob.step++;rObStep();}
 function rObStep(){
   const s=S.ob.step,d=S.ob.d;
-  document.getElementById('oblbl').textContent=`Step ${s} of 9`;
-  document.getElementById('obpf').style.width=(s/9*100)+'%';
+  document.getElementById('oblbl').textContent=`Step ${s} of 8`;
+  document.getElementById('obpf').style.width=(s/8*100)+'%';
   const steps={
     1:`<div class="obt">What's your name?</div><div class="obs">Let's personalise your experience</div>
-       <div class="field"><label>Your name</label><input id="on" type="text" placeholder="e.g. Adam" value="${d.name||''}"></div>
+       <div class="field"><label>Your name</label><input id="on" type="text" placeholder="e.g. Ahmed" value="${d.name||''}"></div>
        <div class="field"><label>Gender</label><div class="og og2"><div class="opt ${d.g==='male'?'sel':''}" onclick="opick(this,'g','male')"><span class="oi">👨</span><span class="ot">Male</span></div><div class="opt ${d.g==='female'?'sel':''}" onclick="opick(this,'g','female')"><span class="oi">👩</span><span class="ot">Female</span></div></div></div>
        <button class="btn bp mt16" onclick="os1()">Next</button>`,
     2:`<div class="obt">Your body stats</div><div class="obs">Used to calculate your exact calorie and macro targets</div>
@@ -3628,34 +3252,27 @@ function rObStep(){
        <div class="og" style="gap:8px">${[['sedentary','Sedentary','Office job, little movement'],['light','Lightly active','Light walking or chores'],['moderate','Moderately active','Active job or 3× training/week'],['active','Very active','Hard training 5–6×/week'],['veryactive','Extremely active','Athlete or physical labour']]
          .map(([v,l,s])=>`<div class="opt ${d.act===v?'sel':''}" onclick="opick(this,'act','${v}')"><span class="ot" style="text-align:left">${l}</span><span class="os" style="text-align:left">${s}</span></div>`).join('')}</div>
        <button class="btn bp mt16" onclick="os4()">Next</button>`,
-    5:`<div class="obt">Training experience</div><div class="obs">This helps us pick the right exercises for your level</div>
-       <div class="og" style="gap:10px">
-         <div class="opt ${d.exp==='beginner'?'sel':''}" onclick="opick(this,'exp','beginner')"><span class="oi">🌱</span><span class="ot">Beginner</span><span class="os">Less than 6 months — learning the basics</span></div>
-         <div class="opt ${d.exp==='intermediate'?'sel':''}" onclick="opick(this,'exp','intermediate')"><span class="oi">💪</span><span class="ot">Intermediate</span><span class="os">6 months to 2 years — comfortable with most movements</span></div>
-         <div class="opt ${d.exp==='advanced'?'sel':''}" onclick="opick(this,'exp','advanced')"><span class="oi">🔥</span><span class="ot">Advanced</span><span class="os">2+ years — experienced with barbells and complex lifts</span></div>
-       </div>
-       <button class="btn bp mt16" onclick="os5()">Next</button>`,
-    6:`<div class="obt">Your equipment</div><div class="obs">What do you have access to?</div>
+    5:`<div class="obt">Your equipment</div><div class="obs">What do you have access to?</div>
        <div class="og" style="gap:10px">
          <div class="opt ${d.eq==='gym'?'sel':''}" onclick="opick(this,'eq','gym')"><span class="oi">🏋️</span><span class="ot">Gym</span><span class="os">Full gym — barbells, machines, cables</span></div>
          <div class="opt ${d.eq==='bands'?'sel':''}" onclick="opick(this,'eq','bands')"><span class="oi">🤸</span><span class="ot">Resistance bands</span><span class="os">Home workout with bands</span></div>
          <div class="opt ${d.eq==='bodyweight'?'sel':''}" onclick="opick(this,'eq','bodyweight')"><span class="oi">💪</span><span class="ot">Bodyweight only</span><span class="os">No equipment needed</span></div>
-       </div><button class="btn bp mt16" onclick="os6()">Next</button>`,
-    7:`<div class="obt">Your goal</div><div class="obs">What are you training for?</div>
+       </div><button class="btn bp mt16" onclick="os5()">Next</button>`,
+    6:`<div class="obt">Your goal</div><div class="obs">What are you training for?</div>
        <div class="og" style="gap:10px">
          <div class="opt ${d.goal==='fatloss'?'sel':''}" onclick="opick(this,'goal','fatloss')"><span class="oi">🔥</span><span class="ot">Fat loss</span><span class="os">Burn fat while keeping muscle</span></div>
          <div class="opt ${d.goal==='muscle'?'sel':''}" onclick="opick(this,'goal','muscle')"><span class="oi">💪</span><span class="ot">Muscle building</span><span class="os">Build size and strength</span></div>
          <div class="opt ${d.goal==='gain'?'sel':''}" onclick="opick(this,'goal','gain')"><span class="oi">📈</span><span class="ot">Weight gain</span><span class="os">Bulk up and add mass</span></div>
-       </div><button class="btn bp mt16" onclick="os7()">Next</button>`,
-    8:`<div class="obt">Training split</div><div class="obs">How do you want to structure your week?</div>
+       </div><button class="btn bp mt16" onclick="os6()">Next</button>`,
+    7:`<div class="obt">Training split</div><div class="obs">How do you want to structure your week?</div>
        <div class="og" style="gap:10px">
          <div class="opt ${d.split==='fullbody'?'sel':''}" onclick="opick(this,'split','fullbody')"><span class="ot">Full body</span><span class="os">All muscle groups each session • 2–3 days/week</span></div>
          <div class="opt ${d.split==='upperlower'?'sel':''}" onclick="opick(this,'split','upperlower')"><span class="ot">Upper / Lower</span><span class="os">Alternate upper and lower • 4 days/week</span></div>
          <div class="opt ${d.split==='ppl'?'sel':''}" onclick="opick(this,'split','ppl')"><span class="ot">Push / Pull / Legs</span><span class="os">Push, Pull, Legs rotation • 3–6 days/week</span></div>
-       </div><button class="btn bp mt16" onclick="os8()">Next</button>`,
-    9:`<div class="obt">Days per week</div><div class="obs">How many days will you train each week?</div>
+       </div><button class="btn bp mt16" onclick="os7()">Next</button>`,
+    8:`<div class="obt">Days per week</div><div class="obs">How many days will you train each week?</div>
        <div class="og og3" style="gap:10px">${[2,3,4,5,6].map(n=>`<div class="opt ${d.dpw==n?'sel':''}" onclick="opick(this,'dpw',${n})"><span class="ot">${n}</span><span class="os">days</span></div>`).join('')}</div>
-       <button class="btn bp mt20" onclick="os9()">Create my profile</button>`
+       <button class="btn bp mt20" onclick="os8()">Create my profile</button>`
   };
   document.getElementById('obbody').innerHTML=`<div class="fin">${steps[s]||''}</div>`;
   document.getElementById('obbody').scrollTop=0;
@@ -3694,11 +3311,10 @@ function os3(){
   obAdv({neck:nkCm,waist:wsCm,hip:hpCm});
 }
 function os4(){if(!S.ob.d.act){toast('Select activity level','err');return;}obAdv();}
-function os5(){if(!S.ob.d.exp){toast('Select your experience level','err');return;}obAdv();}
-function os6(){if(!S.ob.d.eq){toast('Select equipment','err');return;}obAdv();}
-function os7(){if(!S.ob.d.goal){toast('Select your goal','err');return;}obAdv();}
-function os8(){if(!S.ob.d.split){toast('Select a training split','err');return;}obAdv();}
-function os9(){if(!S.ob.d.dpw){toast('Select days per week','err');return;}finOb();}
+function os5(){if(!S.ob.d.eq){toast('Select equipment','err');return;}obAdv();}
+function os6(){if(!S.ob.d.goal){toast('Select your goal','err');return;}obAdv();}
+function os7(){if(!S.ob.d.split){toast('Select a training split','err');return;}obAdv();}
+function os8(){if(!S.ob.d.dpw){toast('Select days per week','err');return;}finOb();}
 async function finOb(){
   try{
     const d=S.ob.d;
@@ -3717,7 +3333,7 @@ async function finOb(){
       id:uid(),name:d.name,gender:d.g,age:d.age||25,
       ht:d.ht||170,wt:d.wt||70,
       neck:d.neck||null,waist:d.waist||null,hip:d.hip||null,
-      act:d.act||'moderate',equip:d.eq||'gym',exp:d.exp||'intermediate',
+      act:d.act||'moderate',equip:d.eq||'gym',
       goal:d.goal,split:d.split,dpw:d.dpw,
       bf,bmi,tdee,cals,workouts:null,weekPlan:null
     };
@@ -3729,6 +3345,7 @@ async function finOb(){
     const m={id:uid(),uid:user.id,date:today(),wt:user.wt,neck:user.neck,waist:user.waist,hip:user.hip||null,bf,tdee,cals};
     await api('saveMeas',{m});
     toast('Welcome, '+d.name+'! 💪','ok');
+    renderProfs();
     await selUser(user.id);
   }catch(err){
     console.error('finOb error:',err);
@@ -3739,50 +3356,16 @@ async function finOb(){
 /* ═══════════════════════════════════════════
    SETUP
 ═══════════════════════════════════════════ */
-async function boot(){
-  // kept for compatibility but not used now — auth state drives init
-  go('v-spl');await sleep(600);
-  try{await loadAll();}catch(e){}
-  if(S.users.length>0){await selUser(S.users[0].id);}else{startOb();}
-}
-function doSetup(){toast('Please use the Sign In screen','warn');go('v-auth');}
-function skipSetup(){go('v-auth');}
-
+function doSetup(){const g=gv('s-gemini')?.trim(),s=gv('s-sheet')?.trim();if(!g&&!s){toast('Fill at least one field','err');return;}if(g)CFG.gemini=g;if(s)CFG.sheet=s;localStorage.setItem('fb_l','1');toast('Saved!','ok');boot();}
+function skipSetup(){localStorage.setItem('fb_l','1');boot();}
+async function boot(){go('v-spl');await sleep(600);try{await loadAll();}catch(e){}renderProfs();go('v-prof');}
 
 /* ═══════════════════════════════════════════
    GEMINI
 ═══════════════════════════════════════════ */
-const WORKER_URL='https://groqfb.badhonkarim30.workers.dev/';
-
-async function groqChat(messages,maxTokens=800){
-  const r=await fetch(WORKER_URL,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({provider:'groq',model:'llama-3.3-70b-versatile',messages,max_tokens:maxTokens,temperature:0.7})
-  });
-  const d=await r.json();
-  if(d.error)throw new Error(d.error.message||JSON.stringify(d.error));
-  return d.choices[0].message.content;
-}
-
-async function geminiVision(base64,prompt){
-  const r=await fetch(WORKER_URL,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      provider:'gemini',
-      model:'gemini-2.0-flash',
-      contents:[{role:'user',parts:[{text:prompt},{inline_data:{mime_type:'image/jpeg',data:base64}}]}],
-      temperature:0.3
-    })
-  });
-  const d=await r.json();
-  if(d.error)throw new Error(d.error.message||JSON.stringify(d.error));
-  return d.candidates?.[0]?.content?.parts?.[0]?.text||'[]';
-}
-
 async function gemini(p){
-  return groqChat([{role:'user',content:p}],1000);
+  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CFG.gemini}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:p}]}],generationConfig:{temperature:.7,maxOutputTokens:1000}})});
+  const d=await r.json();if(d.error)throw new Error(d.error.message);return d.candidates[0].content.parts[0].text;
 }
 
 /* ═══════════════════════════════════════════
@@ -3821,76 +3404,14 @@ function getCustomFoods(){
 }
 function saveCustomFoods(arr){
   localStorage.setItem('fb_community_foods', JSON.stringify(arr));
-  // Sync to Firestore shared collection
-  if(_fbDb){
-    arr.forEach(food=>{
-      try{_fbDb.collection('communityFoods').doc(food.id).set(food);}catch(e){}
-    });
-  }
-}
-
-// Load community foods from Firestore into localStorage cache
-async function syncCommunityFoods(){
-  if(!_fbDb) return;
-  try{
-    const snap=await _fbDb.collection('communityFoods').orderBy('addedAt','desc').limit(500).get();
-    const foods=snap.docs.map(d=>d.data());
-    if(foods.length){
-      localStorage.setItem('fb_community_foods',JSON.stringify(foods));
-    }
-  }catch(e){console.log('Community foods sync skipped:',e.message);}
-}
-
-async function searchFirestoreFoods(query){
-  if(!_fbDb) return [];
-  try{
-    const q=query.toLowerCase().trim();
-    // Firestore doesn't support full-text search natively — fetch recent 500 and filter client-side
-    const cached=getCustomFoods();
-    return cached.filter(f=>
-      f.name.toLowerCase().includes(q)||(f.brand||'').toLowerCase().includes(q)
-    );
-  }catch(e){return[];}
 }
 
 function searchCustomFoods(query){
-  const foods=getCustomFoods();
-  if(!foods.length)return[];
-  if(!query.trim())return foods.slice(0,10);
-  // Use Fuse.js if available, else basic includes
-  if(typeof Fuse!=='undefined'){
-    const fuse=new Fuse(foods,{
-      keys:['name','brand'],
-      threshold:0.4,      // 0=exact, 1=match anything — 0.4 tolerates typos
-      distance:100,
-      minMatchCharLength:2,
-      includeScore:true
-    });
-    return fuse.search(query).map(r=>r.item);
-  }
-  const q=query.toLowerCase().trim();
-  return foods.filter(f=>
-    f.name.toLowerCase().includes(q)||(f.brand||'').toLowerCase().includes(q)
+  const q = query.toLowerCase().trim();
+  return getCustomFoods().filter(f =>
+    f.name.toLowerCase().includes(q) ||
+    (f.brand||'').toLowerCase().includes(q)
   );
-}
-
-// Fuzzy-sort API results by relevance to query
-function fuzzyRankFoods(foods, query){
-  if(!query||!foods.length||typeof Fuse==='undefined') return foods;
-  const fuse=new Fuse(foods,{
-    keys:['name','brand'],
-    threshold:0.6,
-    distance:100,
-    minMatchCharLength:2,
-    includeScore:true,
-    shouldSort:true
-  });
-  const results=fuse.search(query);
-  // Return fuse-ranked items first, then remaining items
-  const ranked=results.map(r=>r.item);
-  const rankedIds=new Set(ranked.map(f=>f.name+f.brand));
-  const rest=foods.filter(f=>!rankedIds.has(f.name+(f.brand||'')));
-  return [...ranked,...rest];
 }
 
 function searchCustomByBarcode(barcode){
@@ -3965,20 +3486,16 @@ function saveCustomFood(){
     ],
     emoji: '⭐',
     source: 'community',
-    addedBy: S.user?.name || 'FitBuddy+ user',
+    addedBy: S.user?.name || 'FitBuddy user',
     addedAt: now()
   };
 
   const existing = getCustomFoods();
+  // If barcode — replace any existing entry with same barcode
   const filtered = _cfBarcode
     ? existing.filter(f => f.barcode !== _cfBarcode)
     : existing;
-  const updated = [food, ...filtered];
-  saveCustomFoods(updated);
-  // Also save directly to Firestore
-  if(_fbDb){
-    try{_fbDb.collection('communityFoods').doc(food.id).set(food);}catch(e){}
-  }
+  saveCustomFoods([food, ...filtered]);
 
   toast('Saved to community database!', 'ok');
   _cfBarcode = null;
@@ -4015,7 +3532,6 @@ function rSettings(){
   const u=S.user;
   const wu=localStorage.getItem('fb_wunit')||'kg';
   const mu=localStorage.getItem('fb_munit')||'cm';
-  const dunit=localStorage.getItem('fb_dunit')||'km';
   const notif=localStorage.getItem('fb_notif')!=='0';
   const vib=localStorage.getItem('fb_vib')!=='0';
   const rt=parseInt(localStorage.getItem('fb_resttime'))||120;
@@ -4048,13 +3564,6 @@ function rSettings(){
         <button class="settings-toggle-btn${mu==='in'?' active':''}" onclick="setSetting('fb_munit','in');rSettings()">in</button>
       </div>
     </div>
-    <div class="settings-row">
-      <div><div class="settings-row-lbl">Distance units</div><div class="settings-row-sub">For running distance &amp; pace</div></div>
-      <div class="settings-toggle">
-        <button class="settings-toggle-btn${dunit==='km'?' active':''}" onclick="setSetting('fb_dunit','km');rSettings()">km</button>
-        <button class="settings-toggle-btn${dunit==='mi'?' active':''}" onclick="setSetting('fb_dunit','mi');rSettings()">mi</button>
-      </div>
-    </div>
   </div>
   <div class="settings-section">Workout</div>
   <div class="settings-group">
@@ -4076,9 +3585,9 @@ function rSettings(){
 
   <div class="settings-section">Account</div>
   <div class="settings-group">
-    <div class="settings-row" style="cursor:pointer" onclick="doSignOut()">
-      <div><div class="settings-row-lbl" style="color:var(--err)">Sign out</div><div class="settings-row-sub">${firebase?.auth()?.currentUser?.email||''}</div></div>
-      <div class="settings-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--err)" stroke-width="2.5" stroke-linecap="round"><polyline points="9 6 15 12 9 18"/></svg></div>
+    <div class="settings-row" onclick="go('v-prof');renderProfs()">
+      <div><div class="settings-row-lbl">Switch profile</div><div class="settings-row-sub">Currently: ${u?.name||'—'}</div></div>
+      <div class="settings-chevron"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 6 15 12 9 18"/></svg></div>
     </div>
     <div class="settings-row" onclick="confDel()">
       <div><div class="settings-row-lbl" style="color:var(--err)">Delete profile</div><div class="settings-row-sub">Permanently removes all data</div></div>
@@ -4106,18 +3615,10 @@ function rSettings(){
       </button>
     </div>
   </div>
-  <div class="settings-section">Gemini AI — Photo Scan</div>
-  <div class="settings-group">
-    <div style="padding:14px 16px">
-      <div style="font-size:13px;color:var(--t3);margin-bottom:10px">Used for AI food photo scanning only. Free key at <a href="https://aistudio.google.com" target="_blank" style="color:var(--acc);font-weight:600">aistudio.google.com</a> — create in new project, no restrictions.</div>
-      <input type="password" id="sett-gemini" placeholder="AIzaSy..." value="${CFG.gemini||''}" style="-webkit-user-select:text;user-select:text;margin-bottom:10px">
-      <button class="btn bp bsm" style="width:100%" onclick="saveGeminiKey()">Save API key</button>
-    </div>
-  </div>
   <div class="settings-section">About</div>
   <div class="settings-group">
     <div class="settings-row">
-      <div><div class="settings-row-lbl">FitBuddy+</div><div class="settings-row-sub">Version 1.1 · Gemini 2.0</div></div>
+      <div><div class="settings-row-lbl">FitBuddy</div><div class="settings-row-sub">Version 1.0</div></div>
     </div>
   </div>
   <div style="height:40px"></div>`;
@@ -4132,15 +3633,7 @@ function toggleNotifSetting(on){
     Notification.requestPermission().then(p=>{setSetting('fb_notif',p==='granted'?'1':'0');rSettings();});
   }else{setSetting('fb_notif',on?'1':'0');}
 }
-function saveGeminiKey(){
-  const raw=document.getElementById('sett-gemini')?.value||'';
-  const v=raw.trim().replace(/^["']|["']$/g,'');
-  if(!v){toast('Please enter a key','err');return;}
-  if(!v.startsWith('AIza')){toast('Key should start with AIza…','warn');}
-  localStorage.setItem('fb_g',v);
-  toast('Gemini key saved ✓','ok');
-  rSettings();
-}
+function saveGeminiKey(){const v=document.getElementById('sett-gemini')?.value?.trim();if(v)CFG.gemini=v;toast('Gemini key saved','ok');rSettings();}
 function saveSheetUrl(){const v=document.getElementById('sett-sheet')?.value?.trim();if(v)CFG.sheet=v;toast('Sheets URL saved','ok');rSettings();}
 function setTheme(t){
   localStorage.setItem('fb_theme',t);
@@ -4169,7 +3662,7 @@ async function sendContactMsg(){
   try{
     if(TG_TOKEN && TG_CHATID){
       const date = new Date().toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-      const text = `📩 New FitBuddy+ message\n\n👤 Name: ${name}\n💬 Message: ${msg}\n📅 Date: ${date}`;
+      const text = `📩 New FitBuddy message\n\n👤 Name: ${name}\n💬 Message: ${msg}\n📅 Date: ${date}`;
       const url  = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
       const res  = await fetch(url,{
         method:'POST',
@@ -4196,435 +3689,7 @@ async function sendContactMsg(){
   }
 }
 
-/* ═══════════════════════════════════════════
-   RUN — GPS TRACKING
-═══════════════════════════════════════════ */
-const RUN={
-  active:false, paused:false,
-  map:null, polyline:null, marker:null,
-  coords:[], startTs:null, pausedMs:0, pauseStart:null,
-  watchId:null, timerIv:null,
-  noSleep:null, ttsSupported:'speechSynthesis' in window,
-  lastLapDist:0, lapDistKm:1,
-  dist:0, // metres
-};
-
-function runDistKm(){return RUN.dist/1000;}
-function runDurSec(){
-  if(!RUN.startTs) return 0;
-  const elapsed=Date.now()-RUN.startTs-RUN.pausedMs;
-  return Math.floor(elapsed/1000);
-}
-function fmtDur(sec){
-  const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;
-  if(h) return `${h}:${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
-  return `${m}:${s<10?'0'+s:s}`;
-}
-function runCalories(distM){
-  const wt=S.user?.wt||70;
-  return Math.round(distM/1000*wt*1.036);
-}
-function haversineM(a,b){
-  const R=6371000,toR=d=>d*Math.PI/180;
-  const dLat=toR(b[0]-a[0]),dLon=toR(b[1]-a[1]);
-  const x=Math.sin(dLat/2)**2+Math.cos(toR(a[0]))*Math.cos(toR(b[0]))*Math.sin(dLon/2)**2;
-  return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
-}
-
-function rRun(){
-  const el=document.getElementById('t-run');
-  if(!el) return;
-  const runs=lg('runs_'+(S.user?.id||''));
-  const histHTML=runs.length?runs.slice().reverse().map(r=>`
-    <div class="run-hist-item">
-      <div class="run-hist-top">
-        <span class="run-hist-date">${new Date(r.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</span>
-        <span class="run-hist-dist">${distStr(r.distM)}</span>
-      </div>
-      <div class="run-hist-stats">
-        <span class="run-hist-stat">⏱ ${fmtDur(r.durSec)}</span>
-        <span class="run-hist-stat">⚡ ${paceStr(r.distM,r.durSec)} /${du()}</span>
-        <span class="run-hist-stat">🔥 ${r.cals} kcal</span>
-      </div>
-    </div>`).join(''):`<div style="text-align:center;padding:32px 0;color:var(--t3);font-size:14px">No runs yet — start your first one above</div>`;
-
-  el.innerHTML=`<div class="scr" style="padding-bottom:100px">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;color:var(--t1);margin-bottom:14px">Run Tracker</div>
-    <div id="run-map"></div>
-    <div class="run-stat-grid three" style="margin-top:12px">
-      <div class="run-stat-box"><div class="run-stat-val" id="rs-dist">0.00</div><div class="run-stat-lbl">${du()}</div></div>
-      <div class="run-stat-box"><div class="run-stat-val" id="rs-dur">0:00</div><div class="run-stat-lbl">time</div></div>
-      <div class="run-stat-box"><div class="run-stat-val" id="rs-pace">—</div><div class="run-stat-lbl">min/${du()}</div></div>
-    </div>
-    <div class="run-stat-grid">
-      <div class="run-stat-box"><div class="run-stat-val" id="rs-cals">0</div><div class="run-stat-lbl">kcal</div></div>
-      <div class="run-stat-box"><div class="run-stat-val" id="rs-spd">0.0</div><div class="run-stat-lbl">${spdUnit()}</div></div>
-    </div>
-    <div class="run-btn-row">
-      <button id="run-start-btn" class="btn bp" style="flex:2" onclick="runStart()">▶ Start run</button>
-      <button id="run-stop-btn"  class="btn bd"  style="flex:1;display:none" onclick="runStop()">■ End</button>
-    </div>
-    <div id="run-gps-note" style="font-size:12px;color:var(--t3);text-align:center;margin-top:8px;display:none">Keep screen on for GPS tracking</div>
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--t1);margin:20px 0 10px">Run history</div>
-    <div id="run-history">${histHTML}</div>
-  </div>`;
-
-  // Init map
-  setTimeout(()=>{
-    if(RUN.map){RUN.map.remove();RUN.map=null;}
-    RUN.map=L.map('run-map',{zoomControl:false,attributionControl:false}).setView([51.505,-0.09],14);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(RUN.map);
-    RUN.polyline=L.polyline([],{color:'#00e5b4',weight:4}).addTo(RUN.map);
-    // Try to centre on user
-    navigator.geolocation?.getCurrentPosition(p=>{
-      RUN.map.setView([p.coords.latitude,p.coords.longitude],16);
-    },()=>{});
-    // Restore active run state if mid-run
-    if(RUN.active) _runRestoreUI();
-  },100);
-}
-
-function _runRestoreUI(){
-  const sb=document.getElementById('run-start-btn');
-  const eb=document.getElementById('run-stop-btn');
-  const note=document.getElementById('run-gps-note');
-  if(sb){sb.textContent=RUN.paused?'▶ Resume':'⏸ Pause';sb.onclick=RUN.paused?runResume:runPause;}
-  if(eb) eb.style.display='';
-  if(note) note.style.display='';
-  if(RUN.polyline && RUN.coords.length) RUN.polyline.setLatLngs(RUN.coords);
-}
-
-function runStart(){
-  if(RUN.active){runPause();return;}
-  if(!navigator.geolocation){toast('GPS not available on this device','err');return;}
-  // NoSleep
-  if(!RUN.noSleep) RUN.noSleep=new NoSleep();
-  RUN.noSleep.enable();
-  RUN.active=true;RUN.paused=false;
-  RUN.coords=[];RUN.dist=0;RUN.pausedMs=0;RUN.lastLapDist=0;
-  RUN.startTs=Date.now();
-  const sb=document.getElementById('run-start-btn');
-  const eb=document.getElementById('run-stop-btn');
-  const note=document.getElementById('run-gps-note');
-  if(sb){sb.textContent='⏸ Pause';sb.onclick=runPause;}
-  if(eb) eb.style.display='';
-  if(note) note.style.display='';
-  RUN.watchId=navigator.geolocation.watchPosition(_runGotPos,_runGpsErr,{enableHighAccuracy:true,maximumAge:2000,timeout:10000});
-  RUN.timerIv=setInterval(_runTick,1000);
-  toast('Run started — GPS active','ok');
-}
-
-function runPause(){
-  if(!RUN.active||RUN.paused) return;
-  RUN.paused=true;RUN.pauseStart=Date.now();
-  navigator.geolocation.clearWatch(RUN.watchId);
-  clearInterval(RUN.timerIv);
-  const sb=document.getElementById('run-start-btn');
-  if(sb){sb.textContent='▶ Resume';sb.onclick=runResume;}
-  toast('Paused','warn');
-}
-
-function runResume(){
-  if(!RUN.active||!RUN.paused) return;
-  RUN.paused=false;
-  RUN.pausedMs+=Date.now()-RUN.pauseStart;
-  RUN.watchId=navigator.geolocation.watchPosition(_runGotPos,_runGpsErr,{enableHighAccuracy:true,maximumAge:2000,timeout:10000});
-  RUN.timerIv=setInterval(_runTick,1000);
-  const sb=document.getElementById('run-start-btn');
-  if(sb){sb.textContent='⏸ Pause';sb.onclick=runPause;}
-  toast('Resumed','ok');
-}
-
-async function runStop(){
-  if(!RUN.active) return;
-  navigator.geolocation.clearWatch(RUN.watchId);
-  clearInterval(RUN.timerIv);
-  RUN.noSleep?.disable();
-  const distM=RUN.dist,durSec=runDurSec(),cals=runCalories(distM);
-  RUN.active=false;RUN.paused=false;
-  // Save
-  if(distM>0&&durSec>=60){
-    const run={id:uid(),uid:S.user?.id,date:new Date().toISOString(),distM,durSec,cals,coords:RUN.coords.slice()};
-    if(_fbUid){await fsSaveRun(run);}else{const runs=lg('runs_'+(S.user?.id||''));runs.push(run);ls('runs_'+(S.user?.id||''),runs);}
-    toast(`Run saved — ${distStr(distM)} 🎉`,'ok');
-  } else {
-    toast('Run must be at least 1 minute to save','warn');
-  }
-  // Reset UI
-  RUN.dist=0;RUN.coords=[];RUN.startTs=null;
-  const sb=document.getElementById('run-start-btn');
-  const eb=document.getElementById('run-stop-btn');
-  const note=document.getElementById('run-gps-note');
-  if(sb){sb.textContent='▶ Start run';sb.onclick=runStart;}
-  if(eb) eb.style.display='none';
-  if(note) note.style.display='none';
-  _runUpdateStats();
-  if(RUN.polyline) RUN.polyline.setLatLngs([]);
-  // Refresh history
-  setTimeout(()=>rRun(),300);
-}
-
-function _runGotPos(pos){
-  const{latitude:lat,longitude:lon,speed}=pos.coords;
-  const pt=[lat,lon];
-  if(RUN.coords.length){
-    const d=haversineM(RUN.coords[RUN.coords.length-1],pt);
-    if(d>2&&d<200){RUN.dist+=d;}
-  }
-  RUN.coords.push(pt);
-  if(RUN.map){
-    if(RUN.polyline) RUN.polyline.setLatLngs(RUN.coords);
-    if(!RUN.marker){
-      RUN.marker=L.circleMarker(pt,{radius:7,color:'#00e5b4',fillColor:'#00e5b4',fillOpacity:1,weight:2}).addTo(RUN.map);
-    } else {RUN.marker.setLatLng(pt);}
-    RUN.map.panTo(pt);
-  }
-  // Speed display
-  const spd=speed?+speed:0;
-  const spdEl=document.getElementById('rs-spd');
-  if(spdEl) spdEl.textContent=spdStr(spd);
-  // Lap announcement — 1km or 1mi depending on setting
-  const lapMetres=du()==='mi'?1609.34:1000;
-  const lapsDone=Math.floor(RUN.dist/lapMetres);
-  if(lapsDone>RUN.lastLapDist&&lapsDone>0){
-    RUN.lastLapDist=lapsDone;
-    const pace=paceStr(RUN.dist,runDurSec());
-    if(RUN.ttsSupported){
-      const unitWord=du()==='mi'?'mile':'kilometre';
-      const u=new SpeechSynthesisUtterance(`${lapsDone} ${unitWord}. Pace ${pace} per ${unitWord}.`);
-      speechSynthesis.speak(u);
-    }
-    toast(`Lap ${lapsDone}${du()} — pace ${pace}/${du()}`,'ok');
-  }
-}
-
-function _runGpsErr(e){
-  if(e.code===e.PERMISSION_DENIED){
-    toast('GPS blocked — allow location in Settings → Safari → Location','err');
-    const note=document.getElementById('run-gps-note');
-    if(note){note.textContent='⚠️ Location blocked. Go to Settings → Privacy → Location Services → Safari → Allow While Using.';note.style.display='block';note.style.color='var(--err)';}
-  } else if(e.code===e.POSITION_UNAVAILABLE){
-    toast('GPS signal unavailable — go outside and try again','err');
-  } else {
-    toast('GPS error — try again','err');
-  }
-  runStop();
-}
-
-function _runTick(){
-  _runUpdateStats();
-}
-
-function _runUpdateStats(){
-  const distEl=document.getElementById('rs-dist');
-  const durEl=document.getElementById('rs-dur');
-  const paceEl=document.getElementById('rs-pace');
-  const calsEl=document.getElementById('rs-cals');
-  const dur=runDurSec();
-  if(distEl) distEl.textContent=distVal(RUN.dist).toFixed(2);
-  if(durEl)  durEl.textContent=fmtDur(dur);
-  if(paceEl) paceEl.textContent=paceStr(RUN.dist,dur);
-  if(calsEl) calsEl.textContent=runCalories(RUN.dist);
-}
-
-/* ═══════════════════════════════════════════
-   REPS & SETS MODAL
-═══════════════════════════════════════════ */
-const REP_RANGES=[
-  {rMin:3,rMax:5,  label:'3–5 reps',  tag:'Strength',         desc:'Build raw power'},
-  {rMin:4,rMax:6,  label:'4–6 reps',  tag:'Strength + Size',  desc:'Power and size combined'},
-  {rMin:6,rMax:8,  label:'6–8 reps',  tag:'Strength + Size',  desc:'Great for compound lifts'},
-  {rMin:8,rMax:12, label:'8–12 reps', tag:'Muscle Growth',     desc:'Best range for building muscle', recommended:true},
-  {rMin:10,rMax:15,label:'10–15 reps',tag:'Muscle + Endurance',desc:'Tone and definition'},
-  {rMin:15,rMax:20,label:'15–20 reps',tag:'Endurance',         desc:'Stamina and conditioning'},
-  {rMin:20,rMax:30,label:'20–30 reps',tag:'Endurance',         desc:'High rep endurance work'},
-];
-let _repsModalIdx=null;
-let _repsSelected={rMin:8,rMax:12,sets:3};
-
-function openRepsModal(idx){
-  _repsModalIdx=idx;
-  const ex=S.sess?.exercises[idx];
-  _repsSelected={rMin:ex?.rMin||8,rMax:ex?.rMax||12,sets:ex?.sets||3};
-  _renderRepsModal();
-  document.getElementById('modal-reps').classList.add('on');
-}
-function closeRepsModal(){
-  document.getElementById('modal-reps').classList.remove('on');
-  _repsModalIdx=null;
-}
-function _renderRepsModal(){
-  // Rep ranges
-  document.getElementById('reps-options').innerHTML=REP_RANGES.map(r=>{
-    const sel=r.rMin===_repsSelected.rMin&&r.rMax===_repsSelected.rMax;
-    return`<div onclick="_repsSelected.rMin=${r.rMin};_repsSelected.rMax=${r.rMax};_renderRepsModal()" style="display:flex;align-items:center;justify-content:space-between;padding:13px 14px;background:${sel?'rgba(0,229,180,.1)':'var(--bg3)'};border:1.5px solid ${sel?'var(--acc)':'var(--bdr2)'};border-radius:var(--rs);cursor:pointer;transition:all .15s">
-      <div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:${sel?'var(--acc)':'var(--t1)'}">${r.label}</span>
-          ${r.recommended?`<span style="background:var(--acc);color:#000;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.05em">Recommended</span>`:''}
-        </div>
-        <div style="font-size:13px;color:var(--t3);margin-top:2px">${r.desc}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-        <span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:${sel?'rgba(0,229,180,.2)':'var(--bg4)'};color:${sel?'var(--acc)':'var(--t3)'}">${r.tag}</span>
-        ${sel?`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`:''}
-      </div>
-    </div>`;
-  }).join('');
-  // Sets
-  document.getElementById('sets-options').innerHTML=[1,2,3,4,5,6].map(n=>{
-    const sel=n===_repsSelected.sets;
-    return`<div onclick="_repsSelected.sets=${n};_renderRepsModal()" style="width:52px;height:52px;border-radius:var(--rs);background:${sel?'var(--acc)':'var(--bg3)'};border:1.5px solid ${sel?'var(--acc)':'var(--bdr2)'};display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .15s">
-      <span style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:${sel?'#000':'var(--t1)'};line-height:1">${n}</span>
-      <span style="font-size:10px;font-weight:600;color:${sel?'#000':'var(--t3)'};text-transform:uppercase;letter-spacing:.04em">sets</span>
-    </div>`;
-  }).join('');
-}
-function applyRepsModal(){
-  if(_repsModalIdx===null)return;
-  const ex=S.sess?.exercises[_repsModalIdx];
-  if(!ex)return;
-  ex.rMin=_repsSelected.rMin;ex.rMax=_repsSelected.rMax;ex.sets=_repsSelected.sets;
-  const cur=ex.cs||[];
-  ex.cs=Array.from({length:_repsSelected.sets},(_,i)=>cur[i]||{r:'',k:''});
-  closeRepsModal();
-  renderSession();
-  toast(`Updated: ${_repsSelected.sets} sets × ${_repsSelected.rMin}–${_repsSelected.rMax} reps`,'ok');
-}
-function applyRepsModalAll(){
-  if(!S.sess?.exercises)return;
-  S.sess.exercises.forEach(ex=>{
-    ex.rMin=_repsSelected.rMin;ex.rMax=_repsSelected.rMax;ex.sets=_repsSelected.sets;
-    const cur=ex.cs||[];
-    ex.cs=Array.from({length:_repsSelected.sets},(_,i)=>cur[i]||{r:'',k:''});
-  });
-  closeRepsModal();
-  renderSession();
-  toast(`All exercises: ${_repsSelected.sets} sets × ${_repsSelected.rMin}–${_repsSelected.rMax} reps`,'ok');
-}
-
-
-const AI={msgs:[],busy:false};
-
-function buildUserContext(){
-  const u=S.user;if(!u)return'';
-  // Recent workouts (last 7 days)
-  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-7);
-  const recentLogs=S.logs.filter(l=>new Date(l.date)>=cutoff).slice(-10);
-  const workoutSummary=recentLogs.map(l=>`${l.date}: ${l.workoutName||'workout'} — ${(l.exercises||[]).map(e=>`${e.name} ${e.sets||0}×${e.reps||0}`).join(', ')}`).join('\n')||'No recent workouts logged.';
-  // Recent measurements
-  const recentMeas=S.meas.slice(-5).map(m=>`${m.date}: weight ${m.wt?dispWt(m.wt)+dispWtU():'—'}${m.bf?', BF '+m.bf+'%':''}`).join('\n')||'No measurements logged.';
-  // Today's food
-  const todayFood=lg('fl_'+(u.id||'')+'_'+today());
-  const totalCals=todayFood.reduce((s,f)=>s+(f.kcal||0),0);
-  const totalProt=todayFood.reduce((s,f)=>s+(f.protein||0),0);
-  const foodSummary=todayFood.length?`Today: ${totalCals} kcal, ${Math.round(totalProt)}g protein — ${todayFood.slice(0,5).map(f=>f.name).join(', ')}`:'No food logged today.';
-
-  return `You are an AI fitness coach inside FitBuddy+. You ONLY answer questions related to fitness, health, nutrition, exercise, sleep, recovery, body composition, and workout planning.
-
-STRICT RULES:
-- If the user asks about ANYTHING unrelated to fitness or health (history, politics, celebrities, science, technology, entertainment, general knowledge, etc.) respond ONLY with: "I'm your fitness coach — I can only help with workouts, nutrition, sleep and health. What fitness goal can I help you with today?"
-- Never break this rule regardless of how the question is phrased or what the user says.
-- Do not explain why you can't answer other topics — just redirect.
-- Be concise, specific and practical. 2–4 short paragraphs max unless a detailed plan is asked for.
-
-USER PROFILE:
-- Name: ${u.name}, Age: ${u.age||'—'}, Gender: ${u.gender||'—'}
-- Weight: ${dispWt(u.wt)} ${dispWtU()}, Height: ${dispHt(u.ht)}
-- Body fat: ${u.bf?u.bf+'%':'unknown'}, BMI: ${u.bmi||'unknown'}
-- Goal: ${GOALS[u.goal]?.label||u.goal}, Experience: ${u.exp||'intermediate'}
-- Equipment: ${EQL[u.equip]||u.equip}, Split: ${u.split||'—'}, ${u.dpw||'—'} days/week
-- TDEE: ${u.tdee||'—'} kcal, Daily target: ${u.cals||'—'} kcal
-
-RECENT WORKOUTS (last 7 days):
-${workoutSummary}
-
-RECENT MEASUREMENTS:
-${recentMeas}
-
-FOOD TODAY:
-${foodSummary}`;
-}
-
-function openAIChat(){
-  document.getElementById('modal-aichat').classList.add('on');
-  if(AI.msgs.length===0){
-    AI.msgs=[{role:'ai',text:`Hey ${S.user?.name||'there'}! 👋 I'm your AI Coach. I can see your workouts, nutrition, measurements and goals. What would you like to work on today?`}];
-    renderAIMsgs();
-  }
-  setTimeout(()=>document.getElementById('ai-chat-input')?.focus(),300);
-}
-function closeAIChat(){
-  document.getElementById('modal-aichat').classList.remove('on');
-}
-function aiChatKey(e){
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendAIMsg();}
-}
-async function sendAIMsg(){
-  if(AI.busy)return;
-  const inp=document.getElementById('ai-chat-input');
-  const text=inp?.value?.trim();
-  if(!text)return;
-  inp.value='';inp.style.height='auto';
-  AI.msgs.push({role:'user',text});
-  AI.msgs.push({role:'ai',text:'Thinking…',typing:true});
-  renderAIMsgs();
-  AI.busy=true;
-  const btn=document.getElementById('ai-send-btn');
-  if(btn)btn.disabled=true;
-  try{
-    const systemCtx=buildUserContext();
-    const history=AI.msgs.filter(m=>!m.typing&&!m.text.startsWith('Hey ')).slice(-10);
-    const messages=[
-      {role:'system',content:systemCtx},
-      ...history.map(m=>({role:m.role==='user'?'user':'assistant',content:m.text}))
-    ];
-    const reply=await groqChat(messages,600);
-    AI.msgs=AI.msgs.filter(m=>!m.typing);
-    AI.msgs.push({role:'ai',text:reply});
-  }catch(err){
-    AI.msgs=AI.msgs.filter(m=>!m.typing);
-    AI.msgs.push({role:'ai',text:'Error: '+err.message});
-    console.error('AI chat error:',err);
-  }finally{
-    AI.busy=false;
-    if(btn)btn.disabled=false;
-    renderAIMsgs();
-  }
-}
-
-function renderAIMsgs(){
-  const el=document.getElementById('ai-chat-msgs');if(!el)return;
-  el.innerHTML=AI.msgs.map(m=>`<div class="ai-msg ${m.role}${m.typing?' typing':''}">${m.text.replace(/\n/g,'<br>')}</div>`).join('');
-  el.scrollTop=el.scrollHeight;
-}
-
 </script>
-
-<!-- MODAL: REPS & SETS -->
-<div id="modal-reps" class="modal-overlay">
-  <div class="modal-sheet" style="max-height:90vh">
-    <div class="modal-hd">
-      <span class="modal-title">Reps &amp; Sets</span>
-      <button class="modal-close" onclick="closeRepsModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div style="padding:16px;overflow-y:auto;-webkit-overflow-scrolling:touch">
-      <!-- Info banner -->
-      <div style="background:var(--bg3);border:1.5px solid var(--bdr2);border-radius:var(--rs);padding:11px 13px;margin-bottom:18px;display:flex;gap:10px;align-items:flex-start">
-        <span style="font-size:16px;flex-shrink:0">ℹ️</span>
-        <span style="font-size:13px;color:var(--t3);line-height:1.55">Lower reps build strength, medium reps build muscle, higher reps improve endurance.</span>
-      </div>
-      <!-- Rep range options -->
-      <div style="font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Rep range</div>
-      <div id="reps-options" style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px"></div>
-      <!-- Sets -->
-      <div style="font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Number of sets</div>
-      <div id="sets-options" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px"></div>
-      <button class="btn bp" onclick="applyRepsModal()">Apply to this exercise</button>
-      <button class="btn bg mt8" onclick="applyRepsModalAll()">Apply to all exercises</button>
-    </div>
-  </div>
-</div>
 
 <!-- MODAL: FOOD DETAIL -->
 <div id="modal-fdtl" class="modal-overlay">
@@ -4792,7 +3857,7 @@ function renderAIMsgs(){
     </div>
 
     <div class="ibox">
-      <p>This food will be saved to the <strong style="color:var(--t1)">shared community database</strong> — all FitBuddy+ users on this network will be able to find it by searching or scanning.</p>
+      <p>This food will be saved to the <strong style="color:var(--t1)">shared community database</strong> — all FitBuddy users on this network will be able to find it by searching or scanning.</p>
     </div>
 
     <button class="btn bp" onclick="saveCustomFood()">
@@ -4835,29 +3900,5 @@ function renderAIMsgs(){
   </div>
   <div class="scr" id="settings-body"></div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/7.0.0/fuse.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/nosleep/0.12.0/NoSleep.min.js"></script>
-
-<!-- AI COACH CHAT MODAL -->
-<div id="modal-aichat" class="modal-overlay">
-  <div class="ai-chat-sheet">
-    <div class="ai-chat-hd">
-      <div class="ai-chat-title">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        AI Coach
-      </div>
-      <button class="modal-close" onclick="closeAIChat()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div class="ai-chat-msgs" id="ai-chat-msgs"></div>
-    <div class="ai-chat-input-row">
-      <textarea class="ai-chat-input" id="ai-chat-input" rows="1" placeholder="Ask your coach anything…" onkeydown="aiChatKey(event)" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'"></textarea>
-      <button class="ai-send-btn" id="ai-send-btn" onclick="sendAIMsg()">
-        <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-      </button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
