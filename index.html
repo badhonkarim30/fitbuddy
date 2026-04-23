@@ -327,7 +327,7 @@ input[type=number]{-moz-appearance:textfield}
 .dai-day{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--t1)}
 .dai-wk{font-size:14px;color:var(--t3)}
 /* SESSION HEADER */
-.sess-hd{padding:14px 16px;border-bottom:1.5px solid var(--bdr);background:var(--bg);position:sticky;top:0;z-index:20}
+.sess-hd{padding:calc(14px + env(safe-area-inset-top)) 16px 14px;border-bottom:1.5px solid var(--bdr);background:var(--bg);position:sticky;top:0;z-index:20}
 .sess-day{font-size:13px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
 .sess-name{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;color:var(--t1)}
 .sess-meta{font-size:14px;color:var(--t3);margin-top:3px}
@@ -518,9 +518,10 @@ input[type=number]{-moz-appearance:textfield}
 
 /* SESSION BOTTOM TIMER (sticks to very bottom of session view) */
 .sess-btm-timer{
-  position:sticky;bottom:0;left:0;right:0;
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;
   background:var(--bg2);border-top:1.5px solid var(--bdr);
-  padding:10px 16px 12px;
+  padding:10px 16px calc(12px + env(safe-area-inset-bottom));
   display:none;z-index:50;
 }
 .sess-btm-timer.on{display:block}
@@ -741,7 +742,7 @@ body.light .bc-vid-wrap{background:var(--bg3)}
     </div>
     <div id="sess-completed-badge" style="font-size:13px;font-weight:700;letter-spacing:.04em;margin-top:4px;color:var(--t3);transition:color .3s">Completed</div>
   </div>
-  <div class="scr" id="sess-body" style="padding-bottom:140px"></div>
+  <div class="scr" id="sess-body" style="padding-bottom:180px"></div>
   <!-- SESSION BOTTOM TIMER -->
   <div class="sess-btm-timer" id="sess-btm-timer">
     <div class="sbt-row">
@@ -2036,16 +2037,11 @@ function rHome(){
   const lastMeas=[...S.meas].sort((a,b)=>a.date.localeCompare(b.date)).slice(-1)[0];
   const lastWt=lastMeas?.wt||S.user?.wt||0;
   const dispLastWt=dispWt(lastWt);
-  const step=0.1;
-  h+=`<div class="cl-item${weighedIn?' done':''}" style="cursor:default">
+  const lastWtTime=lastMeas?.date?fmtDate(lastMeas.date):'—';
+  h+=`<div class="cl-item${weighedIn?' done':''}" onclick="openWeighSheet()">
     <div class="cl-icon cl-icon-wt"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><path d="M5 21h14"/><path d="M5 8l7-5 7 5"/><path d="M3 12a4 4 0 008 0H3z"/><path d="M13 12a4 4 0 008 0h-8z"/></svg></div>
-    <div class="cl-text"><div class="cl-title">Weigh in</div><div class="cl-sub" id="wt-sub">${weighedIn?'Logged today':'Last: '+dispLastWt+' '+dispWtU()}</div></div>
-    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-      <button onclick="homeWtAdj(-${step})" style="width:34px;height:34px;border-radius:50%;background:var(--bg3);border:1.5px solid var(--bdr2);color:var(--t1);font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">−</button>
-      <input id="home-wt-inp" type="number" step="${step}" value="${dispLastWt}" style="width:62px;height:34px;text-align:center;font-size:16px;font-weight:700;border-radius:8px;border:1.5px solid var(--bdr2);background:var(--bg3);color:var(--t1);font-family:'Barlow',sans-serif;-webkit-user-select:text;user-select:text">
-      <button onclick="homeWtAdj(${step})" style="width:34px;height:34px;border-radius:50%;background:var(--acc);border:none;color:#000;font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">+</button>
-      <button onclick="homeWtSave()" style="height:34px;padding:0 12px;border-radius:8px;background:var(--acc);border:none;color:#000;font-size:13px;font-weight:700;cursor:pointer;font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em">Save</button>
-    </div>
+    <div class="cl-text"><div class="cl-title">Weigh in</div><div class="cl-sub">${weighedIn?'Logged today · '+dispLastWt+' '+dispWtU():'Last: '+dispLastWt+' '+dispWtU()}</div></div>
+    <div class="cl-check">${weighedIn?`<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`:''}</div>
   </div>
   <div class="cl-item" onclick="tab('food')">
     <div class="cl-icon cl-icon-fd"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
@@ -2795,16 +2791,28 @@ function toggleHistLog(id){
   el.style.display=open?'block':'none';
   if(arrow)arrow.style.transform=open?'rotate(180deg)':'rotate(0deg)';
 }
-function homeWtAdj(delta){
-  const inp=document.getElementById('home-wt-inp');
+function openWeighSheet(){
+  const lastMeas=[...S.meas].sort((a,b)=>a.date.localeCompare(b.date)).slice(-1)[0];
+  const lastWt=lastMeas?.wt||S.user?.wt||0;
+  const inp=document.getElementById('weigh-sheet-inp');
+  const lbl=document.getElementById('weigh-last-lbl');
+  if(inp)inp.value=dispWt(lastWt);
+  if(lbl)lbl.textContent=lastMeas?`Last: ${dispWt(lastWt)} ${dispWtU()} · ${fmtDate(lastMeas.date)}`:'No weight logged yet';
+  document.getElementById('modal-weigh').classList.add('on');
+  setTimeout(()=>inp?.focus(),300);
+}
+function closeWeighSheet(){
+  document.getElementById('modal-weigh').classList.remove('on');
+}
+function weighSheetAdj(delta){
+  const inp=document.getElementById('weigh-sheet-inp');
   if(!inp)return;
   const cur=parseFloat(inp.value)||0;
-  inp.value=Math.round((cur+delta)*10)/10;
+  inp.value=(Math.round((cur+delta)*10)/10).toFixed(1);
 }
-async function homeWtSave(){
-  const inp=document.getElementById('home-wt-inp');
-  if(!inp)return;
-  const val=parseFloat(inp.value);
+async function weighSheetSave(){
+  const inp=document.getElementById('weigh-sheet-inp');
+  const val=parseFloat(inp?.value);
   if(!val||val<=0){toast('Enter a valid weight','err');return;}
   const wtKg=toKg(val);
   const u=S.user;
@@ -2813,9 +2821,12 @@ async function homeWtSave(){
   S.meas.push(m);
   u.wt=wtKg;
   await api('saveUser',{user:u});
+  closeWeighSheet();
   toast('Weight saved: '+val+' '+dispWtU(),'ok');
   rHome();
 }
+function homeWtAdj(delta){weighSheetAdj(delta);}
+async function homeWtSave(){await weighSheetSave();}
 function showMF(){
   const u=S.user;
   document.getElementById('mfm').innerHTML=`<div class="card cacc fin"><div class="ctit">New measurement</div>
@@ -4945,6 +4956,39 @@ function renderAIMsgs(){
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/7.0.0/fuse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/nosleep/0.12.0/NoSleep.min.js"></script>
+
+<!-- WEIGH-IN BOTTOM SHEET -->
+<div id="modal-weigh" class="modal-overlay">
+  <div class="modal-sheet" style="padding-bottom:env(safe-area-inset-bottom)">
+    <div style="width:40px;height:4px;background:var(--bdr2);border-radius:2px;margin:10px auto 0"></div>
+    <div style="padding:16px 20px 0;display:flex;align-items:flex-start;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(251,191,36,.15);display:flex;align-items:center;justify-content:center">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--warn)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><path d="M5 21h14"/><path d="M5 8l7-5 7 5"/><path d="M3 12a4 4 0 008 0H3z"/><path d="M13 12a4 4 0 008 0h-8z"/></svg>
+        </div>
+        <div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:var(--t1)">Daily Weigh-in</div>
+          <div id="weigh-last-lbl" style="font-size:13px;color:var(--t3);margin-top:2px"></div>
+        </div>
+      </div>
+      <button onclick="closeWeighSheet()" class="modal-close"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="padding:24px 20px 8px">
+      <div style="font-size:13px;font-weight:600;color:var(--t3);margin-bottom:14px;text-transform:uppercase;letter-spacing:.06em">Enter Today's Weight</div>
+      <div style="display:flex;align-items:center;background:var(--bg3);border-radius:var(--r);padding:14px 16px;gap:0">
+        <button onclick="weighSheetAdj(-0.1)" style="width:44px;height:44px;border:none;background:none;font-size:28px;font-weight:300;color:var(--acc);cursor:pointer;flex-shrink:0">−</button>
+        <div style="flex:1;display:flex;align-items:baseline;justify-content:center;gap:8px">
+          <input id="weigh-sheet-inp" type="number" step="0.1" style="width:100px;font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:800;color:var(--t1);background:none;border:none;outline:none;text-align:center;-webkit-user-select:text;user-select:text">
+          <span style="font-size:20px;font-weight:600;color:var(--t3)">${dispWtU()}</span>
+        </div>
+        <button onclick="weighSheetAdj(0.1)" style="width:44px;height:44px;border:none;background:none;font-size:28px;font-weight:300;color:var(--acc);cursor:pointer;flex-shrink:0">+</button>
+      </div>
+    </div>
+    <div style="padding:12px 20px 20px">
+      <button class="btn bp" style="width:100%;font-size:18px" onclick="weighSheetSave()">Save Weight</button>
+    </div>
+  </div>
+</div>
 
 <!-- AI COACH CHAT MODAL -->
 <div id="modal-aichat" class="modal-overlay">
