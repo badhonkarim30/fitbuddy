@@ -1981,6 +1981,14 @@ async function selUser(id){
   }
   S.workouts=S.user.workouts;S.weekPlan=S.user.weekPlan;S.food=null;
   syncCommunityFoods().catch(()=>{});
+  // Sync runs from Firestore into localStorage cache
+  if(_fbUid){
+    try{
+      const snap=await _uref().collection('runs').orderBy('date','desc').limit(100).get();
+      const runs=snap.docs.map(d=>d.data());
+      if(runs.length) ls('runs_'+_fbUid,runs);
+    }catch(e){}
+  }
   // Sync YT IDs from saved exercises into YT dict
   S.workouts.forEach(wk=>wk.exercises.forEach(ex=>{if(ex.ytId)YT[ex.name]=ex.ytId;}));
   tab('home');
@@ -2796,7 +2804,9 @@ function openWeighSheet(){
   const lastWt=lastMeas?.wt||S.user?.wt||0;
   const inp=document.getElementById('weigh-sheet-inp');
   const lbl=document.getElementById('weigh-last-lbl');
+  const unit=document.getElementById('weigh-sheet-unit');
   if(inp)inp.value=dispWt(lastWt);
+  if(unit)unit.textContent=dispWtU();
   if(lbl)lbl.textContent=lastMeas?`Last: ${dispWt(lastWt)} ${dispWtU()} · ${fmtDate(lastMeas.date)}`:'No weight logged yet';
   document.getElementById('modal-weigh').classList.add('on');
   setTimeout(()=>inp?.focus(),300);
@@ -4348,7 +4358,8 @@ function haversineM(a,b){
 function rRun(){
   const el=document.getElementById('t-run');
   if(!el) return;
-  const runs=lg('runs_'+(S.user?.id||''));
+  const runKey='runs_'+((_fbUid||S.user?.id)||'');
+  const runs=lg(runKey);
   const histHTML=runs.length?runs.slice().reverse().map(r=>`
     <div class="run-hist-item">
       <div class="run-hist-top">
@@ -4978,8 +4989,8 @@ function renderAIMsgs(){
       <div style="display:flex;align-items:center;background:var(--bg3);border-radius:var(--r);padding:14px 16px;gap:0">
         <button onclick="weighSheetAdj(-0.1)" style="width:44px;height:44px;border:none;background:none;font-size:28px;font-weight:300;color:var(--acc);cursor:pointer;flex-shrink:0">−</button>
         <div style="flex:1;display:flex;align-items:baseline;justify-content:center;gap:8px">
-          <input id="weigh-sheet-inp" type="number" step="0.1" style="width:100px;font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:800;color:var(--t1);background:none;border:none;outline:none;text-align:center;-webkit-user-select:text;user-select:text">
-          <span style="font-size:20px;font-weight:600;color:var(--t3)">${dispWtU()}</span>
+          <input id="weigh-sheet-inp" type="number" step="0.1" style="width:130px;font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:800;color:var(--t1);background:none;border:none;outline:none;text-align:center;-webkit-user-select:text;user-select:text">
+          <span id="weigh-sheet-unit" style="font-size:20px;font-weight:600;color:var(--t3)">kg</span>
         </div>
         <button onclick="weighSheetAdj(0.1)" style="width:44px;height:44px;border:none;background:none;font-size:28px;font-weight:300;color:var(--acc);cursor:pointer;flex-shrink:0">+</button>
       </div>
