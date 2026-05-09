@@ -2704,7 +2704,11 @@ document.addEventListener('visibilitychange', ()=>{
 ═══════════════════════════════════════════ */
 function rProgress(){
   const u=S.user;if(!u)return;
-  const sorted=[...S.meas].sort((a,b)=>a.date.localeCompare(b.date));
+  // Keep only the latest measurement per day
+  const dedupedMeas=[...S.meas].sort((a,b)=>a.date.localeCompare(b.date)).reduce((acc,m)=>{
+    acc[m.date]=m; return acc;
+  },{});
+  const sorted=Object.values(dedupedMeas).sort((a,b)=>a.date.localeCompare(b.date));
   const last=sorted[sorted.length-1];
   const bf=last?.bf||u.bf||null;const wt=last?.wt||u.wt;
   const firstWt=sorted[0]?.wt||u.wt;
@@ -4024,14 +4028,26 @@ function searchCustomByBarcode(barcode){
 /* ── CREATE FOOD VIEW ── */
 let _cfBarcode = null; // if opened from failed barcode scan
 
+function cfScanBarcode(){
+  // Start barcode scanner and put result into the barcode input
+  startBarcodeScanner(code=>{
+    const inp=document.getElementById('cf-barcode-inp');
+    if(inp) inp.value=code;
+    toast('Barcode scanned: '+code,'ok');
+  });
+}
 function openCreateFood(prefillName, barcode){
   _cfBarcode = barcode || null;
   // Reset form
-  ['cf-name','cf-brand','cf-cal','cf-pro','cf-carb','cf-fat'].forEach(id=>{
+  ['cf-name','cf-brand','cf-cal','cf-pro','cf-carb','cf-fat','cf-barcode-inp'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.value='';
   });
   if(prefillName) document.getElementById('cf-name').value = prefillName;
+  if(barcode){
+    const bInp=document.getElementById('cf-barcode-inp');
+    if(bInp) bInp.value=barcode;
+  }
 
   const banner = document.getElementById('cf-barcode-banner');
   const bannerText = document.getElementById('cf-barcode-text');
@@ -4079,7 +4095,7 @@ function saveCustomFood(){
     id: uid(),
     name,
     brand: document.getElementById('cf-brand')?.value?.trim() || '',
-    barcode: _cfBarcode || null,
+    barcode: document.getElementById('cf-barcode-inp')?.value?.trim() || _cfBarcode || null,
     per100: { cal, p: pro, c: carb, f: fat },
     servings: [
       {label:'100g', grams:100},
@@ -4884,6 +4900,16 @@ function renderAIMsgs(){
     <div class="field">
       <label>Brand (optional)</label>
       <input type="text" id="cf-brand" placeholder="e.g. Tesco" style="-webkit-user-select:text;user-select:text">
+    </div>
+    <div class="field">
+      <label>Barcode (optional)</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input type="text" id="cf-barcode-inp" placeholder="e.g. 5000159407236" inputmode="numeric" style="-webkit-user-select:text;user-select:text;flex:1">
+        <button type="button" onclick="cfScanBarcode()" style="height:44px;padding:0 14px;border-radius:var(--rs);background:var(--bg3);border:1.5px solid var(--bdr2);color:var(--t2);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Barlow',sans-serif">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="vertical-align:middle;margin-right:4px"><rect x="2" y="6" width="4" height="12"/><rect x="8" y="6" width="2" height="12"/><rect x="12" y="6" width="3" height="12"/><rect x="17" y="6" width="2" height="12"/><rect x="21" y="6" width="1" height="12"/></svg>Scan
+        </button>
+      </div>
+      <div style="font-size:12px;color:var(--t3);margin-top:6px">Adding a barcode lets others find this product by scanning</div>
     </div>
 
     <div style="font-size:13px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Nutrition per 100g / 100ml</div>
