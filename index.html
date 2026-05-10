@@ -4257,7 +4257,7 @@ function rSettings(){
   <div class="settings-section">About</div>
   <div class="settings-group">
     <div class="settings-row">
-      <div><div class="settings-row-lbl">FitBuddy+</div><div class="settings-row-sub">Version 1.1 · Gemini 2.0</div></div>
+      <div><div class="settings-row-lbl">FitBuddy+</div><div class="settings-row-sub">Version 1.2 · May 2026</div></div>
     </div>
   </div>
   <div style="height:40px"></div>`;
@@ -4376,7 +4376,7 @@ function rRun(){
   if(!el) return;
   const runKey='runs_'+((_fbUid||S.user?.id)||'');
   const runs=lg(runKey);
-  const histHTML=runs.length?runs.slice().reverse().map(r=>`
+  const histHTML=runs.length?runs.slice().reverse().map((r,ri)=>`
     <div class="run-hist-item">
       <div class="run-hist-top">
         <span class="run-hist-date">${new Date(r.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</span>
@@ -4387,6 +4387,7 @@ function rRun(){
         <span class="run-hist-stat">⚡ ${paceStr(r.distM,r.durSec)} /${du()}</span>
         <span class="run-hist-stat">🔥 ${r.cals} kcal</span>
       </div>
+      ${r.coords&&r.coords.length>1?`<div id="hist-map-${ri}" style="width:100%;height:180px;border-radius:10px;margin-top:10px;overflow:hidden;background:var(--bg3)"></div>`:''}
     </div>`).join(''):`<div style="text-align:center;padding:32px 0;color:var(--t3);font-size:14px">No runs yet — start your first one above</div>`;
 
   el.innerHTML=`<div class="scr" style="padding-bottom:100px">
@@ -4410,18 +4411,34 @@ function rRun(){
     <div id="run-history">${histHTML}</div>
   </div>`;
 
-  // Init map
+  // Init main run map
   setTimeout(()=>{
     if(RUN.map){RUN.map.remove();RUN.map=null;}
     RUN.map=L.map('run-map',{zoomControl:false,attributionControl:false}).setView([51.505,-0.09],14);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(RUN.map);
-    RUN.polyline=L.polyline([],{color:'#00e5b4',weight:4}).addTo(RUN.map);
-    // Try to centre on user
+    RUN.polyline=L.polyline([],{color:'#00e5b4',weight:5,opacity:0.9}).addTo(RUN.map);
     navigator.geolocation?.getCurrentPosition(p=>{
       RUN.map.setView([p.coords.latitude,p.coords.longitude],16);
     },()=>{});
-    // Restore active run state if mid-run
     if(RUN.active) _runRestoreUI();
+
+    // Init history route maps
+    const runsRev=runs.slice().reverse();
+    runsRev.forEach((r,ri)=>{
+      if(!r.coords||r.coords.length<2) return;
+      const mapEl=document.getElementById(`hist-map-${ri}`);
+      if(!mapEl) return;
+      try{
+        const hmap=L.map(mapEl,{zoomControl:false,attributionControl:false,dragging:false,scrollWheelZoom:false,doubleClickZoom:false,touchZoom:false});
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(hmap);
+        const line=L.polyline(r.coords,{color:'#00e5b4',weight:4,opacity:0.9}).addTo(hmap);
+        // Start dot (green)
+        L.circleMarker(r.coords[0],{radius:6,color:'#fff',fillColor:'#4ade80',fillOpacity:1,weight:2}).addTo(hmap);
+        // End dot (red)
+        L.circleMarker(r.coords[r.coords.length-1],{radius:6,color:'#fff',fillColor:'#f87171',fillOpacity:1,weight:2}).addTo(hmap);
+        hmap.fitBounds(line.getBounds(),{padding:[12,12]});
+      }catch(e){}
+    });
   },100);
 }
 
@@ -4492,7 +4509,7 @@ async function runStop(){
     toast('Run must be at least 1 minute to save','warn');
   }
   // Reset UI
-  RUN.dist=0;RUN.coords=[];RUN.startTs=null;
+  RUN.dist=0;RUN.coords=[];RUN.startTs=null;RUN.startMarker=null;
   const sb=document.getElementById('run-start-btn');
   const eb=document.getElementById('run-stop-btn');
   const note=document.getElementById('run-gps-note');
@@ -4506,25 +4523,36 @@ async function runStop(){
 }
 
 function _runGotPos(pos){
-  const{latitude:lat,longitude:lon,speed}=pos.coords;
+  if(!RUN.active||RUN.paused)return;
+  const{latitude:lat,longitude:lon,speed,accuracy}=pos.coords;
+  // Skip very inaccurate readings
+  if(accuracy>50)return;
   const pt=[lat,lon];
   if(RUN.coords.length){
     const d=haversineM(RUN.coords[RUN.coords.length-1],pt);
-    if(d>2&&d<200){RUN.dist+=d;}
+    // Only add point if moved meaningfully (>3m) and not a GPS jump (>300m)
+    if(d<3||d>300)return;
+    RUN.dist+=d;
   }
   RUN.coords.push(pt);
   if(RUN.map){
-    if(RUN.polyline) RUN.polyline.setLatLngs(RUN.coords);
+    // addLatLng is faster than setLatLngs — appends without redrawing
+    if(RUN.polyline) RUN.polyline.addLatLng(pt);
+    // Start marker (green dot)
+    if(!RUN.startMarker&&RUN.coords.length===1){
+      RUN.startMarker=L.circleMarker(pt,{radius:7,color:'#4ade80',fillColor:'#4ade80',fillOpacity:1,weight:2}).addTo(RUN.map);
+    }
+    // Current position marker (teal dot)
     if(!RUN.marker){
-      RUN.marker=L.circleMarker(pt,{radius:7,color:'#00e5b4',fillColor:'#00e5b4',fillOpacity:1,weight:2}).addTo(RUN.map);
-    } else {RUN.marker.setLatLng(pt);}
+      RUN.marker=L.circleMarker(pt,{radius:8,color:'#fff',fillColor:'#00e5b4',fillOpacity:1,weight:2}).addTo(RUN.map);
+    }else{RUN.marker.setLatLng(pt);}
     RUN.map.panTo(pt);
   }
   // Speed display
   const spd=speed?+speed:0;
   const spdEl=document.getElementById('rs-spd');
   if(spdEl) spdEl.textContent=spdStr(spd);
-  // Lap announcement — 1km or 1mi depending on setting
+  // Lap announcement
   const lapMetres=du()==='mi'?1609.34:1000;
   const lapsDone=Math.floor(RUN.dist/lapMetres);
   if(lapsDone>RUN.lastLapDist&&lapsDone>0){
