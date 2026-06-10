@@ -1192,20 +1192,31 @@ function bmiCat(bmi){
   return{n:'Obese',color:'#f87171'};
 }
 function calcTDEE(g,age,h,w,act){const bmr=g==='male'?(10*+w+6.25*+h-5*+age+5):(10*+w+6.25*+h-5*+age-161);return Math.round(bmr*(ACT[act]||1.375));}
-function calcCals(tdee,goal){return tdee+(GOALS[goal]?.adj||0)}
+function calcCals(tdee,goal,flRate){
+  if(goal==='fatloss'){
+    const deficit=flRate==='0.75'?825:550; // 0.75kg/wk or 0.5kg/wk
+    return Math.round(tdee-deficit);
+  }
+  return tdee+(GOALS[goal]?.adj||0);
+}
 
-// Returns RANGES for protein, carbs, fat
-function calcMacros(cals,w,bf){
+// Returns RANGES for protein, carbs, fat — goal-aware
+function calcMacros(cals,w,bf,goal){
   const wt=+w, bfPct=bf||20;
-  const leanKg = wt*(1-bfPct/100);
-  // Protein: 1.6–2.2g per kg lean mass
-  const pMin=Math.round(leanKg*1.6), pMax=Math.round(leanKg*2.2);
-  // Fat: 22–30% of calories
-  const fMin=Math.round(cals*0.22/9), fMax=Math.round(cals*0.30/9);
-  // Carbs from midpoints
-  const pMid=Math.round((pMin+pMax)/2), fMid=Math.round((fMin+fMax)/2);
+  const leanKg=wt*(1-bfPct/100);
+  const isFatLoss=goal==='fatloss';
+  // Protein: higher for fat loss (2.0–2.4g/kg lean) vs standard (1.6–2.2g/kg lean)
+  const pMin=Math.round(leanKg*(isFatLoss?2.0:1.6));
+  const pMax=Math.round(leanKg*(isFatLoss?2.4:2.2));
+  // Fat: 22–28% of calories (slightly lower for fat loss)
+  const fMin=Math.round(cals*(isFatLoss?0.22:0.22)/9);
+  const fMax=Math.round(cals*(isFatLoss?0.28:0.30)/9);
+  // Carbs: remainder — lower for fat loss due to higher protein
+  const pMid=Math.round((pMin+pMax)/2);
+  const fMid=Math.round((fMin+fMax)/2);
   const cMid=Math.max(0,Math.round((cals-pMid*4-fMid*9)/4));
-  const cMin=Math.max(0,Math.round(cMid*0.85)), cMax=Math.round(cMid*1.15);
+  const cMin=Math.max(0,Math.round(cMid*(isFatLoss?0.80:0.85)));
+  const cMax=Math.round(cMid*(isFatLoss?1.05:1.15));
   return{p:{min:pMin,max:pMax},c:{min:cMin,max:cMax},f:{min:fMin,max:fMax}};
 }
 
@@ -2000,7 +2011,7 @@ async function selUser(id){
 function rHome(){
   S.weekOffset=0; // always show current week on home tab
   const u=S.user;if(!u)return;
-  const m=calcMacros(u.cals||2000,u.wt,u.bf||20);
+  const m=calcMacros(u.cals||2000,u.wt,u.bf||20,u.goal);
   const todayPlan=getTodayPlan();
   const todayWk=todayPlan&&!todayPlan.rest?getWorkout(todayPlan.workoutId):null;
   const hr=new Date().getHours();
@@ -2405,7 +2416,13 @@ function pickEx(name,muscle){_pickerOnSelect?.({name,muscle});}
 ═══════════════════════════════════════════ */
 function startSession(wkId){
   const wk=getWorkout(wkId);if(!wk){toast('Workout not found','err');return;}
-  S.sess={wkId,wkName:wk.name,started:now(),exercises:wk.exercises.map(e=>({...e,ytId:e.ytId||YT[e.name]||'',cs:[...Array(e.sets)].map(()=>({r:'',k:''}))}))};
+  S.sess={wkId,wkName:wk.name,started:now(),exercises:wk.exercises.map(e=>({
+    ...e,
+    ytId:e.ytId||YT[e.name]||'',
+    cs:e.muscle==='cardio'
+      ?[{r:0,k:0,dur:0}]  // cardio: 1 set, duration-based
+      :[...Array(e.sets)].map(()=>({r:'',k:''}))
+  }))};
   renderSession();go('v-session');
 }
 function renderSession(){
@@ -2425,10 +2442,14 @@ function renderSession(){
 }
 
 function isExDone(ex){
+  if(ex.muscle==='cardio') return ex.cs.length>0&&ex.cs.every(s=>s.dur>0);
   return ex.cs.length>0 && ex.cs.every(s=>s.r&&s.k);
 }
 
 function sessExCard(ex,idx){
+  const isCardio=ex.muscle==='cardio';
+  if(isCardio) return sessCardioCard(ex,idx);
+
   const prev=getPrev(ex.name);
   const cur=S.sess.exercises[idx].cs;
   const collapsed=S.sess.exercises[idx].collapsed||false;
@@ -2478,6 +2499,114 @@ function sessExCard(ex,idx){
       <div class="shint">${ex.sets} sets · ${ex.rest>0?Math.floor(ex.rest/60)+'m '+((ex.rest%60)?ex.rest%60+'s':''):'no rest'} rest</div>
     </div>`:''}
   </div>`;
+}
+
+function sessCardioCard(ex,idx){
+  const cur=S.sess.exercises[idx].cs;
+  const collapsed=S.sess.exercises[idx].collapsed||false;
+  const exDone=cur.every(s=>s.dur>0);
+  const thumb=exThumbHTML(ex.name,ex.muscle,ex.ytId||YT[ex.name]||'',true,`openVideo('${ex.name.replace(/'/g,"\\'")}','${ex.muscle}')`);
+  const doneTag=exDone?`<span class="tag tok" style="font-size:12px">✓ Done</span>`:'';
+
+  // Ensure max 2 sets for cardio
+  if(cur.length>2) S.sess.exercises[idx].cs=cur.slice(0,2);
+
+  const setRows=cur.map((s,si)=>{
+    const durFmt=s.dur?fmtDur(s.dur):'—';
+    const isRunning=_cardioTimers&&_cardioTimers[`${idx}-${si}`];
+    return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr)">
+      <span class="sn" style="flex-shrink:0">S${si+1}</span>
+      <div id="ct-display-${idx}-${si}" style="flex:1;font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;color:${s.dur?'var(--acc)':'var(--t3)'};letter-spacing:.03em">${durFmt}</div>
+      <button onclick="toggleCardioTimer(${idx},${si})" style="width:48px;height:48px;border-radius:50%;background:${isRunning?'var(--err)':'var(--acc)'};border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        ${isRunning
+          ?`<svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`
+          :`<svg width="18" height="18" viewBox="0 0 24 24" fill="#000"><polygon points="5,3 19,12 5,21"/></svg>`
+        }
+      </button>
+      ${s.dur?`<button onclick="resetCardioTimer(${idx},${si})" style="width:36px;height:36px;border-radius:50%;background:var(--bg3);border:1.5px solid var(--bdr2);cursor:pointer;color:var(--t3);font-size:18px;display:flex;align-items:center;justify-content:center">↺</button>`:''}
+    </div>`;
+  }).join('');
+
+  return`<div class="excard fin" id="excard-${idx}" style="${exDone?'border-color:rgba(74,222,128,.25);':''}">
+    <div class="exhd" style="cursor:pointer" onclick="toggleExCollapse(${idx})">
+      ${thumb}
+      <div class="exhd-info" style="flex:1;min-width:0">
+        <div class="exnm">${toProperCase(ex.name)}</div>
+        <div class="extags" style="flex-wrap:wrap;gap:5px">
+          <span class="tag tg">Cardio</span>
+          ${ex.note?`<span class="tag tw">${ex.note}</span>`:'<span class="tag ta">Duration</span>'}
+          ${doneTag}
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <button class="wpbtn" onclick="event.stopPropagation();openExMenu(${idx},this)" style="width:34px;height:34px;color:var(--t2)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+        </button>
+        <div style="color:var(--t3);transition:transform .2s;${collapsed?'transform:rotate(180deg)':''}">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>
+        </div>
+      </div>
+    </div>
+    ${!collapsed?`<div class="exbd">
+      <div>${setRows}</div>
+      <div class="sacts mt8">
+        ${cur.length<2?`<button class="sadd" onclick="addCardioSet(${idx})">+ Add set</button>`:'<div></div>'}
+        ${cur.length>1?`<button class="srm" onclick="rmCardioSet(${idx})">− Remove set</button>`:''}
+      </div>
+    </div>`:''}
+  </div>`;
+}
+
+// ── CARDIO TIMER FUNCTIONS ──
+const _cardioTimers={};
+
+function toggleCardioTimer(idx,si){
+  const key=`${idx}-${si}`;
+  if(_cardioTimers[key]){
+    // Stop — save duration
+    const {startedAt,prev}=_cardioTimers[key];
+    const elapsed=Math.floor((Date.now()-startedAt)/1000);
+    S.sess.exercises[idx].cs[si].dur=(prev||0)+elapsed;
+    clearInterval(_cardioTimers[key].iv);
+    delete _cardioTimers[key];
+  } else {
+    // Start
+    const prev=S.sess.exercises[idx].cs[si].dur||0;
+    const startedAt=Date.now()-prev*1000;
+    const iv=setInterval(()=>{
+      const elapsed=Math.floor((Date.now()-startedAt)/1000);
+      const el=document.getElementById(`ct-display-${idx}-${si}`);
+      if(el){el.textContent=fmtDur(elapsed);el.style.color='var(--acc)';}
+    },1000);
+    _cardioTimers[key]={startedAt,prev,iv};
+  }
+  renderSession();
+}
+
+function resetCardioTimer(idx,si){
+  const key=`${idx}-${si}`;
+  if(_cardioTimers[key]){
+    clearInterval(_cardioTimers[key].iv);
+    delete _cardioTimers[key];
+  }
+  S.sess.exercises[idx].cs[si].dur=0;
+  renderSession();
+}
+
+function addCardioSet(idx){
+  if(S.sess.exercises[idx].cs.length>=2)return;
+  S.sess.exercises[idx].cs.push({r:0,k:0,dur:0});
+  renderSession();
+}
+
+function rmCardioSet(idx){
+  const cs=S.sess.exercises[idx].cs;
+  if(cs.length<=1)return;
+  const si=cs.length-1;
+  const key=`${idx}-${si}`;
+  if(_cardioTimers[key]){clearInterval(_cardioTimers[key].iv);delete _cardioTimers[key];}
+  cs.pop();
+  renderSession();
 }
 
 function toggleExCollapse(idx){
@@ -2715,8 +2844,9 @@ function rProgress(){
   const wtD=wt&&firstWt&&sorted.length>1?(+wt-+firstWt).toFixed(1):null;
   const bfc=bf?bfCat(bf,u.gender):null;
   let h=`<div class="rb mt4 mb12"><h2 style="font-size:26px">Progress</h2><button class="btn bg bsm" onclick="showMF()">+ Measurement</button></div>`;
-  h+=`<div class="ccrd"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px"><div><div class="clbl">Body fat</div><div><span class="cval">${bf||'—'}</span><span class="cunt">%</span></div>${bfc?`<div class="mt8"><span class="tag ta">${bfc.n} range</span></div>`:''}</div></div>
-    ${sorted.length>1?lineChart(sorted.map(m=>({x:m.date.slice(5),y:m.bf||0})),'#00e5b4'):'<div style="text-align:center;padding:16px 0;font-size:14px;color:var(--t3)">Add more measurements to see trend</div>'}
+
+  // Body fat — show value and category only, no chart
+  h+=`<div class="ccrd"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div><div class="clbl">Body fat</div><div><span class="cval">${bf||'—'}</span><span class="cunt">%</span></div>${bfc?`<div class="mt8"><span class="tag ta">${bfc.n} range</span></div>`:''}</div></div>
     ${bfc?`<div class="bfcs">${(u.gender==='female'?BFF:BFM).map(c=>`<div class="bfc${bf>=c.lo&&bf<=c.hi?' cur':''}"><div class="bfn">${c.n}</div><div class="bfr">${c.r}</div></div>`).join('')}</div>`:''}</div>
     ${(()=>{const bmi=last?.bmi||calcBMI(last?.wt||u.wt,u.ht);const bc=bmi?bmiCat(bmi):null;return bmi?`<div class="card mt8">
       <div class="ctit">BMI — Body Mass Index</div>
@@ -2733,10 +2863,11 @@ function rProgress(){
         <div style="color:#fbbf24">Over<br>25–29.9</div>
         <div style="color:#f87171">Obese<br>30+</div>
       </div>
-      <div style="font-size:12px;color:var(--t3);margin-top:10px;line-height:1.5">BMI is a general indicator. Body fat % is more accurate for athletes and people with high muscle mass.</div>
     </div>`:'';})()}`;
-  h+=`<div class="ccrd"><div style="display:flex;justify-content:space-between;margin-bottom:14px"><div><div class="clbl">Body weight</div><div><span class="cval">${dispWt(wt)||'—'}</span><span class="cunt">${dispWtU()}</span>${wtD?`<span class="cdlt ${+wtD>0?'cpos':'cneg'}">${+wtD>0?'+':''}${wtD}kg</span>`:''}</div></div></div>
-    ${sorted.length>1?lineChart(sorted.map(m=>({x:m.date.slice(5),y:+m.wt||0})),'#fbbf24'):'<div style="text-align:center;padding:16px 0;font-size:14px;color:var(--t3)">Add more measurements to see trend</div>'}</div>`;
+
+  // Weight chart
+  h+=`<div class="ccrd"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><div><div class="clbl">Body weight</div><div><span class="cval">${dispWt(wt)||'—'}</span><span class="cunt">${dispWtU()}</span>${wtD?`<span class="cdlt ${+wtD>0?'cpos':'cneg'}">${+wtD>0?'+':''}${wtD}${dispWtU()}</span>`:''}</div></div></div>
+    ${weightChart(sorted)}</div>`;
   if(sorted.length){h+=`<div class="card"><div class="ctit">History</div>`;[...sorted].reverse().slice(0,10).forEach(m=>{h+=`<div class="mlog"><span class="mlogd">${fmtDate(m.date)}</span><div class="mlogv">${m.wt}kg · ${m.bf||'—'}% BF<br><span style="color:var(--t3);font-size:13px">${m.cals||'—'} kcal target</span></div></div>`;});h+=`</div>`;}
   h+=`<div id="mfm"></div>`;
 
@@ -2857,18 +2988,133 @@ function prevBF(){
   const u=S.user;const nk=gv('mnk')||u?.neck,ws=gv('mws')||u?.waist,hp=gv('mhp')||u?.hip;
   const bf=calcBF(u?.gender,u?.ht,nk,ws,hp);const wt=parseFloat(gv('mwt'));
   const pr=document.getElementById('mpr');
-  if(pr&&bf&&wt){const tdee=calcTDEE(u?.gender,u?.age,u?.ht,wt,u?.act);const cals=calcCals(tdee,u?.goal);pr.textContent=`Body fat: ${bf}%  ·  New target: ${cals} kcal/day`;}
+  if(pr&&bf&&wt){const tdee=calcTDEE(u?.gender,u?.age,u?.ht,wt,u?.act);const cals=calcCals(tdee,u?.goal,u?.flRate);pr.textContent=`Body fat: ${bf}%  ·  New target: ${cals} kcal/day`;}
 }
 async function saveMeas(){
   const u=S.user;const wt=toKg(parseFloat(gv('mwt')));if(!wt){toast('Enter your weight','err');return;}
   const nk=+gv('mnk')||u?.neck,ws=+gv('mws')||u?.waist,hp=+gv('mhp')||u?.hip;
-  const bf=calcBF(u?.gender,u?.ht,nk,ws,hp);const tdee=calcTDEE(u?.gender,u?.age,u?.ht,wt,u?.act);const cals=calcCals(tdee,u?.goal);
+  const bf=calcBF(u?.gender,u?.ht,nk,ws,hp);const tdee=calcTDEE(u?.gender,u?.age,u?.ht,wt,u?.act);const cals=calcCals(tdee,u?.goal,u?.flRate);
   const m={id:uid(),uid:u.id,date:today(),wt,neck:nk,waist:ws,hip:hp||null,bf,tdee,cals};
   await api('saveMeas',{m});S.meas.push(m);
   Object.assign(S.user,{wt,bf,tdee,cals});if(nk)S.user.neck=nk;if(ws)S.user.waist=ws;if(hp)S.user.hip=hp;
   await api('saveUser',{user:S.user});S.food=null;
   toast('Saved — target updated to '+cals+' kcal','ok');rProgress();
 }
+function weightChart(sorted){
+  if(sorted.length<2) return`<div style="text-align:center;padding:20px 0;font-size:14px;color:var(--t3)">Log more weigh-ins to see your trend</div>`;
+
+  const pts=sorted.map(m=>({x:m.date,y:+dispWt(m.wt)}));
+  const W=340,H=140,pl=48,pr=16,pt=16,pb=28;
+  const iw=W-pl-pr,ih=H-pt-pb;
+
+  // 7-day rolling average
+  const avg=pts.map((p,i)=>{
+    const window=pts.slice(Math.max(0,i-3),i+4);
+    return{x:p.x,y:+(window.reduce((s,v)=>s+v.y,0)/window.length).toFixed(1)};
+  });
+
+  const allY=[...pts.map(p=>p.y),...avg.map(p=>p.y)];
+  const mn=Math.min(...allY),mx=Math.max(...allY);
+  const pad=(mx-mn)*0.15||0.5;
+  const lo=mn-pad,hi=mx+pad,rng=hi-lo;
+
+  const cx=(p,i)=>(pl+i/(pts.length-1)*iw).toFixed(1);
+  const cy=(v)=>(pt+ih-(v-lo)/rng*ih).toFixed(1);
+
+  // Smooth bezier path
+  function smoothPath(data){
+    return data.map((p,i)=>{
+      if(i===0) return`M${cx(p,0)} ${cy(p.y)}`;
+      const prev=data[i-1];
+      const x0=+cx(prev,i-1),y0=+cy(prev.y);
+      const x1=+cx(p,i),y1=+cy(p.y);
+      const cpx=(x0+x1)/2;
+      return`C${cpx} ${y0} ${cpx} ${y1} ${x1} ${y1}`;
+    }).join(' ');
+  }
+
+  // Area fill under weight line
+  const areaPath=`${smoothPath(pts)} L${cx(pts[pts.length-1],pts.length-1)} ${pt+ih} L${cx(pts[0],0)} ${pt+ih} Z`;
+
+  // Y axis labels (3 evenly spaced)
+  const yLabels=[lo,lo+rng/2,hi].map((v,i)=>`<text x="${pl-6}" y="${cy(v)}" fill="var(--t3)" font-size="10" font-family="Barlow,sans-serif" text-anchor="end" dominant-baseline="middle">${v.toFixed(1)}</text>`).join('');
+
+  // X axis labels: first, middle, last date
+  const xIdxs=[0,Math.floor((pts.length-1)/2),pts.length-1];
+  const xLabels=xIdxs.map(i=>{
+    const d=new Date(pts[i].x);
+    const lbl=d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    return`<text x="${cx(pts[i],i)}" y="${H-4}" fill="var(--t3)" font-size="10" font-family="Barlow,sans-serif" text-anchor="middle">${lbl}</text>`;
+  }).join('');
+
+  // Invisible hit areas for tooltip
+  const hits=pts.map((p,i)=>`<rect x="${(+cx(p,i)-iw/(pts.length*2)).toFixed(1)}" y="${pt}" width="${(iw/pts.length).toFixed(1)}" height="${ih}" fill="transparent" onmouseenter="showWtTip(this,${i})" ontouchstart="showWtTip(this,${i})" data-val="${p.y}" data-avg="${avg[i].y}" data-date="${p.x}"/>`).join('');
+
+  // Latest dot
+  const lastDot=`<circle cx="${cx(pts,pts.length-1)}" cy="${cy(pts[pts.length-1].y)}" r="5" fill="#fff" stroke="#fbbf24" stroke-width="2.5"/>`;
+
+  return`<div style="position:relative">
+    <svg id="wt-chart-svg" width="100%" viewBox="0 0 ${W} ${H}" style="overflow:visible;margin:8px 0 0;display:block">
+      <defs>
+        <linearGradient id="wtGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#fbbf24" stop-opacity="0"/>
+        </linearGradient>
+        <clipPath id="wtClip"><rect x="${pl}" y="${pt}" width="${iw}" height="${ih}"/></clipPath>
+      </defs>
+      <!-- Grid lines -->
+      ${[0,0.5,1].map(f=>`<line x1="${pl}" y1="${(pt+ih*(1-f)).toFixed(1)}" x2="${W-pr}" y2="${(pt+ih*(1-f)).toFixed(1)}" stroke="var(--bdr)" stroke-width="1" stroke-dasharray="4 4"/>`).join('')}
+      <!-- Area fill -->
+      <path d="${areaPath}" fill="url(#wtGrad)" clip-path="url(#wtClip)"/>
+      <!-- Weight line -->
+      <path d="${smoothPath(pts)}" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" clip-path="url(#wtClip)"/>
+      <!-- Average line -->
+      <path d="${smoothPath(avg)}" fill="none" stroke="#f87171" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 3" clip-path="url(#wtClip)" opacity="0.8"/>
+      ${yLabels}${xLabels}${hits}
+      <!-- Latest dot -->
+      ${lastDot}
+      <!-- Tooltip marker -->
+      <circle id="wt-tip-dot" cx="-999" cy="-999" r="5" fill="#fff" stroke="#fbbf24" stroke-width="2" style="pointer-events:none"/>
+      <line id="wt-tip-line" x1="-999" y1="${pt}" x2="-999" y2="${pt+ih}" stroke="rgba(255,255,255,0.2)" stroke-width="1" style="pointer-events:none"/>
+    </svg>
+    <!-- Tooltip -->
+    <div id="wt-tip-box" style="display:none;position:absolute;top:10px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1.5px solid var(--bdr2);border-radius:10px;padding:8px 14px;text-align:center;pointer-events:none;z-index:10;min-width:130px">
+      <div id="wt-tip-val" style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--t1)"></div>
+      <div id="wt-tip-avg" style="font-size:12px;color:var(--t3);margin-top:2px"></div>
+      <div id="wt-tip-date" style="font-size:11px;color:var(--t3);margin-top:1px"></div>
+    </div>
+    <!-- Legend -->
+    <div style="display:flex;gap:16px;justify-content:center;margin-top:6px">
+      <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t3)"><div style="width:16px;height:2.5px;background:#fbbf24;border-radius:2px"></div>Weight</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t3)"><div style="width:16px;height:2px;background:#f87171;border-radius:2px;opacity:.8"></div>7-day avg</div>
+    </div>
+  </div>`;
+}
+
+function showWtTip(el,i){
+  const tip=document.getElementById('wt-tip-box');
+  const val=document.getElementById('wt-tip-val');
+  const avg=document.getElementById('wt-tip-avg');
+  const dt=document.getElementById('wt-tip-date');
+  const dot=document.getElementById('wt-tip-dot');
+  const line=document.getElementById('wt-tip-line');
+  if(!tip||!val)return;
+  const d=new Date(el.dataset.date);
+  val.textContent=el.dataset.val+' '+dispWtU();
+  avg.textContent=el.dataset.avg+' (7d avg)';
+  dt.textContent=d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});
+  // Position dot on chart
+  const svg=document.getElementById('wt-chart-svg');
+  if(svg&&dot&&line){
+    const rect=svg.getBoundingClientRect();
+    // x from rect position in SVG
+  }
+  tip.style.display='block';
+  // Hide after 2.5s on touch
+  clearTimeout(tip._hideT);
+  tip._hideT=setTimeout(()=>tip.style.display='none',2500);
+}
+
 function lineChart(pts,color){
   if(pts.length<2)return'';
   const W=320,H=90,pad=16;const ys=pts.map(p=>p.y).filter(Boolean);
@@ -2888,7 +3134,7 @@ function rFood(){
   if(!S.fdDate)S.fdDate=today();
   const log=getFoodLog(S.fdDate);
   const tots=getFoodTotals(log);
-  const m=calcMacros(u.cals||2000,u.wt,u.bf||20);
+  const m=calcMacros(u.cals||2000,u.wt,u.bf||20,u.goal);
   const calPct=u.cals?Math.min(tots.cal/u.cals,1.05):0;
   const isOver=u.cals&&tots.cal>u.cals;
   const isToday=S.fdDate===today();
@@ -3608,7 +3854,7 @@ function defFood(goal){
 function rProTab(){
   const u=S.user;if(!u)return;
   const idx=S.users.indexOf(u);const bfc=u.bf?bfCat(u.bf,u.gender):null;
-  const m=calcMacros(u.cals||2000,u.wt,u.bf||20);
+  const m=calcMacros(u.cals||2000,u.wt,u.bf||20,u.goal);
   let h=`<div style="display:flex;align-items:center;justify-content:flex-end;padding:10px 16px 0">
     <button onclick="go('v-settings');rSettings()" style="background:var(--bg3);border:1.5px solid var(--bdr2);border-radius:10px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2)">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -3655,7 +3901,7 @@ async function saveRC(){
   const u=S.user;
   const wt=toKg(parseFloat(gv('pw'))||dispWt(u.wt)),ht=htFromInputs('ph')||u.ht,nk=gv('pn')?toCm(+gv('pn')):u.neck,ws=gv('ps')?toCm(+gv('ps')):u.waist,hp=gv('pp')?toCm(+gv('pp')):u.hip;
   Object.assign(u,{wt,ht,neck:nk,waist:ws,hip:hp||null});
-  u.bf=calcBF(u.gender,ht,nk,ws,hp);u.tdee=calcTDEE(u.gender,u.age,ht,wt,u.act);u.cals=calcCals(u.tdee,u.goal);
+  u.bf=calcBF(u.gender,ht,nk,ws,hp);u.tdee=calcTDEE(u.gender,u.age,ht,wt,u.act);u.cals=calcCals(u.tdee,u.goal,u.flRate);
   await api('saveUser',{user:u});
   const m={id:uid(),uid:u.id,date:today(),wt,neck:nk,waist:ws,hip:hp||null,bf:u.bf,tdee:u.tdee,cals:u.cals};
   await api('saveMeas',{m});S.meas.push(m);S.food=null;
@@ -3664,7 +3910,7 @@ async function saveRC(){
 async function saveProg(){
   const u=S.user;
   u.goal=gv('pg')||u.goal;u.equip=gv('peq')||u.equip;u.dpw=parseInt(gv('pd'))||u.dpw;u.exp=gv('pexp')||u.exp||'intermediate';
-  u.cals=calcCals(u.tdee,u.goal);
+  u.cals=calcCals(u.tdee,u.goal,u.flRate);
   const{workouts,weekPlan}=buildDefaultWorkoutsAndPlan(u);
   S.workouts=workouts;S.weekPlan=weekPlan;u.workouts=workouts;u.weekPlan=weekPlan;
   await api('saveUser',{user:u});S.food=null;S.sess=null;
@@ -3752,10 +3998,18 @@ function rObStep(){
        </div><button class="btn bp mt16" onclick="os6()">Next</button>`,
     7:`<div class="obt">Your goal</div><div class="obs">What are you training for?</div>
        <div class="og" style="gap:10px">
-         <div class="opt ${d.goal==='fatloss'?'sel':''}" onclick="opick(this,'goal','fatloss')"><span class="oi">🔥</span><span class="ot">Fat loss</span><span class="os">Burn fat while keeping muscle</span></div>
-         <div class="opt ${d.goal==='muscle'?'sel':''}" onclick="opick(this,'goal','muscle')"><span class="oi">💪</span><span class="ot">Muscle building</span><span class="os">Build size and strength</span></div>
-         <div class="opt ${d.goal==='gain'?'sel':''}" onclick="opick(this,'goal','gain')"><span class="oi">📈</span><span class="ot">Weight gain</span><span class="os">Bulk up and add mass</span></div>
-       </div><button class="btn bp mt16" onclick="os7()">Next</button>`,
+         <div class="opt ${d.goal==='fatloss'?'sel':''}" onclick="opick(this,'goal','fatloss');document.getElementById('fl-rate-box').style.display='block'"><span class="oi">🔥</span><span class="ot">Fat loss</span><span class="os">Burn fat while keeping muscle</span></div>
+         <div class="opt ${d.goal==='muscle'?'sel':''}" onclick="opick(this,'goal','muscle');document.getElementById('fl-rate-box').style.display='none'"><span class="oi">💪</span><span class="ot">Muscle building</span><span class="os">Build size and strength</span></div>
+         <div class="opt ${d.goal==='gain'?'sel':''}" onclick="opick(this,'goal','gain');document.getElementById('fl-rate-box').style.display='none'"><span class="oi">📈</span><span class="ot">Weight gain</span><span class="os">Bulk up and add mass</span></div>
+       </div>
+       <div id="fl-rate-box" style="display:${d.goal==='fatloss'?'block':'none'};margin-top:16px">
+         <div class="obs" style="margin-bottom:10px">How fast do you want to lose weight?</div>
+         <div class="og" style="gap:10px">
+           <div class="opt ${d.flRate==='0.5'?'sel':''}" onclick="opick(this,'flRate','0.5')"><span class="oi">🐢</span><span class="ot">0.5 kg / week</span><span class="os">Steady — less muscle loss</span></div>
+           <div class="opt ${d.flRate==='0.75'?'sel':''}" onclick="opick(this,'flRate','0.75')"><span class="oi">⚡</span><span class="ot">0.75 kg / week</span><span class="os">Faster — higher deficit</span></div>
+         </div>
+       </div>
+       <button class="btn bp mt16" onclick="os7()">Next</button>`,
     8:`<div class="obt">Training split</div><div class="obs">How do you want to structure your week?</div>
        <div class="og" style="gap:10px">
          <div class="opt ${d.split==='fullbody'?'sel':''}" onclick="opick(this,'split','fullbody')"><span class="ot">Full body</span><span class="os">All muscle groups each session • 2–3 days/week</span></div>
@@ -3805,7 +4059,11 @@ function os3(){
 function os4(){if(!S.ob.d.act){toast('Select activity level','err');return;}obAdv();}
 function os5(){if(!S.ob.d.exp){toast('Select your experience level','err');return;}obAdv();}
 function os6(){if(!S.ob.d.eq){toast('Select equipment','err');return;}obAdv();}
-function os7(){if(!S.ob.d.goal){toast('Select your goal','err');return;}obAdv();}
+function os7(){
+  if(!S.ob.d.goal){toast('Select your goal','err');return;}
+  if(S.ob.d.goal==='fatloss'&&!S.ob.d.flRate){toast('Select your weekly fat loss rate','err');return;}
+  obAdv();
+}
 function os8(){if(!S.ob.d.split){toast('Select a training split','err');return;}obAdv();}
 function os9(){if(!S.ob.d.dpw){toast('Select days per week','err');return;}finOb();}
 async function finOb(){
@@ -3821,13 +4079,13 @@ async function finOb(){
     const bf=calcBF(d.g,d.ht,d.neck,d.waist,d.hip);
     const bmi=calcBMI(d.wt,d.ht);
     const tdee=calcTDEE(d.g,d.age,d.ht,d.wt,d.act);
-    const cals=calcCals(tdee,d.goal);
+    const cals=calcCals(tdee,d.goal,d.flRate);
     const user={
       id:uid(),name:d.name,gender:d.g,age:d.age||25,
       ht:d.ht||170,wt:d.wt||70,
       neck:d.neck||null,waist:d.waist||null,hip:d.hip||null,
       act:d.act||'moderate',equip:d.eq||'gym',exp:d.exp||'intermediate',
-      goal:d.goal,split:d.split,dpw:d.dpw,
+      goal:d.goal,split:d.split,dpw:d.dpw,flRate:d.flRate||null,
       bf,bmi,tdee,cals,workouts:null,weekPlan:null
     };
     const{workouts,weekPlan}=buildDefaultWorkoutsAndPlan(user);
