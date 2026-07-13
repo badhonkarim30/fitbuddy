@@ -265,12 +265,16 @@ input[type=number]{-moz-appearance:textfield}
 .exnm{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--t1)}
 .extags{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
 .exbd{padding:14px 16px}
-.stbl{width:100%;border-collapse:separate;border-spacing:0 4px}
+.stbl{width:100%;border-collapse:separate;border-spacing:0 6px}
 .stbl tbody tr{height:44px}
-.stbl th{font-size:12px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;padding:0 4px 8px;text-align:center}
-.stbl th:first-child{text-align:left;width:32px}
+.stbl th{font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;padding:0 4px 8px;text-align:center}
+.stbl th:first-child{text-align:left;width:28px}
+.stbl th:nth-child(2){width:72px}
+.stbl th:nth-child(3){width:76px;padding-left:28px}
+.stbl th:nth-child(4){width:88px}
 .stbl td{padding:2px 3px;vertical-align:middle;text-align:center}
 .stbl td:first-child{text-align:left}
+.stbl td:nth-child(3){padding-left:4px}
 .sn{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--t3)}
 .pvc{font-size:14px;font-weight:500;color:var(--t2);background:var(--bg3);border-radius:8px;padding:8px 5px;text-align:center;white-space:nowrap;min-width:62px}
 .pvc.none{color:#555}
@@ -278,7 +282,7 @@ input[type=number]{-moz-appearance:textfield}
 .si::-webkit-inner-spin-button,.si::-webkit-outer-spin-button{-webkit-appearance:none}
 .si:focus{border-color:var(--acc)}
 .si.done{border-color:var(--ok);background:rgba(74,222,128,.08);color:var(--ok)}
-.pb{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:700;background:var(--warn2);color:var(--warn);padding:1px 5px;border-radius:4px;white-space:nowrap;pointer-events:none;z-index:1}
+.pb-medal{position:absolute;left:5px;top:50%;transform:translateY(-50%);font-size:15px;line-height:1;z-index:2;pointer-events:none;filter:drop-shadow(0 1px 4px rgba(0,0,0,.6))}
 .sacts{display:flex;gap:8px;margin-top:12px}
 .sacts button{flex:1;height:38px;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;cursor:pointer;border:1.5px solid;background:transparent;transition:transform .12s}
 .sacts button:active{transform:scale(.96)}
@@ -2454,14 +2458,21 @@ function sessExCard(ex,idx){
   const exDone=isExDone(ex);
   const thumb=exThumbHTML(ex.name,ex.muscle,ex.ytId||YT[ex.name]||'',true,`openVideo('${ex.name.replace(/'/g,"\\'")}','${ex.muscle}')`);
   let rows='';
+  // Find best completed set for medal (highest weight, tiebreak: most reps)
+  const completed=cur.map((s,i)=>({s,i})).filter(({s})=>s.r&&s.k);
+  let medalIdx=-1;
+  if(completed.length>0){
+    const best=completed.reduce((b,c)=>(parseFloat(c.s.k)*1000+parseInt(c.s.r))>(parseFloat(b.s.k)*1000+parseInt(b.s.r))?c:b);
+    if(isPB(ex.name,best.s.r,best.s.k)) medalIdx=best.i;
+  }
   cur.forEach((s,si)=>{
     const pTxt=prev[si]?`${prev[si].r}×${prev[si].k}kg`:'—';
     const done=s.r&&s.k;
-    const pbBadge=done&&isPB(ex.name,s.r,s.k)?'<span class="pb">PB</span>':'';
+    const medal=si===medalIdx?'<span class="pb-medal">🥇</span>':'';
     rows+=`<tr>
       <td><span class="sn">S${si+1}</span></td>
       <td><div class="pvc${!prev[si]?' none':''}">${pTxt}</div></td>
-      <td><div style="position:relative;display:flex;align-items:center;justify-content:center;">${pbBadge}<input class="si${done?' done':''}" type="number" min="1" max="99" placeholder="—" value="${s.r}" oninput="this.value=this.value.replace(/^0+([1-9])/,'$1');sv(${idx},${si},'r',this.value)" onblur="this.value=this.value.replace(/^0+([1-9])/,'$1');sv(${idx},${si},'r',this.value)" style="width:100%;"></div></td>
+      <td><div style="position:relative;display:flex;align-items:center;justify-content:center;padding-left:22px;">${medal}<input class="si${done?' done':''}" type="number" min="1" max="99" placeholder="—" value="${s.r}" oninput="this.value=this.value.replace(/^0+([1-9])/,'$1');sv(${idx},${si},'r',this.value)" onblur="this.value=this.value.replace(/^0+([1-9])/,'$1');sv(${idx},${si},'r',this.value)" style="width:100%;"></div></td>
       <td><input class="si${done?' done':''}" type="number" min="0" step=".5" placeholder="—" value="${s.k}" oninput="this.value=this.value.replace(/^0+([1-9])/,'$1');sv(${idx},${si},'k',this.value)" onblur="this.value=this.value.replace(/^0+([1-9])/,'$1');sv(${idx},${si},'k',this.value)"></td>
     </tr>`;
   });
@@ -2694,15 +2705,23 @@ function sv(ei,si,f,val){
   const rows=document.querySelectorAll(`#sb${ei} tr`);
   if(rows[si]){
     rows[si].querySelectorAll('.si').forEach(inp=>inp.classList.toggle('done',!!(s.r&&s.k)));
-    if(s.r&&s.k&&isPB(S.sess.exercises[ei].name,s.r,s.k)){
-      const td=rows[si].querySelectorAll('td')[2];
-      const wrapper=td?.querySelector('div');
-      if(wrapper&&!wrapper.querySelector('.pb')){const b=document.createElement('span');b.className='pb';b.textContent='PB';wrapper.prepend(b);}
+  }
+  // Clear all medals in this exercise, then place on single best PB set
+  document.querySelectorAll(`#sb${ei} .pb-medal`).forEach(m=>m.remove());
+  const exObj=S.sess.exercises[ei];
+  const completed=exObj.cs.map((cs,i)=>({cs,i})).filter(({cs})=>cs.r&&cs.k);
+  if(completed.length>0){
+    const best=completed.reduce((b,c)=>(parseFloat(c.cs.k)*1000+parseInt(c.cs.r))>(parseFloat(b.cs.k)*1000+parseInt(b.cs.r))?c:b);
+    if(isPB(exObj.name,best.cs.r,best.cs.k)){
+      const targetRow=rows[best.i];
+      if(targetRow){
+        const wrapper=targetRow.querySelectorAll('td')[2]?.querySelector('div');
+        if(wrapper){const m=document.createElement('span');m.className='pb-medal';m.textContent='🥇';wrapper.appendChild(m);}
+      }
     }
   }
   if(f==='k'&&val&&s.r)startTimer(S.sess.exercises[ei].rest||(parseInt(localStorage.getItem('fb_resttime'))||120),S.sess.exercises[ei].name);
   if(f==='r'&&val&&s.k)startTimer(S.sess.exercises[ei].rest||(parseInt(localStorage.getItem('fb_resttime'))||120),S.sess.exercises[ei].name);
-  // Update today's ring in real time
   updateTodayRing();
 }
 
