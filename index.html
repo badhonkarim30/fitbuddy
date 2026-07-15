@@ -1970,6 +1970,7 @@ function tab(name){
   const el=document.getElementById('t-'+name);
   el.style.display='flex';el.style.flexDirection='column';
   document.querySelectorAll('.ni').forEach(b=>b.classList.toggle('on',b.dataset.t===name));
+  if(name==='home') S.weekOffset=0;
   ({home:rHome,workout:rWorkout,progress:rProgress,food:rFood,profile:rProTab,run:rRun})[name]?.();
   go('v-app');
 }
@@ -2011,7 +2012,6 @@ async function selUser(id){
    HOME
 ═══════════════════════════════════════════ */
 function rHome(){
-  S.weekOffset=0; // always show current week on home tab
   const u=S.user;if(!u)return;
   const m=calcMacros(u.cals||2000,u.wt,u.bf||20,u.goal);
   const todayPlan=getTodayPlan();
@@ -2127,6 +2127,66 @@ function shiftWeek(delta){
   if(homeScr) rHome();
 }
 
+function dayCircleClick(dateStr,dayIdx,isToday,done){
+  if(done){openDayDetail(dateStr);return;}
+  if(isToday){tab('workout');return;}
+  const plan=S.weekPlan[dayIdx];
+  const isRest=!plan||plan.rest;
+  if(isRest){toast('Rest day 😌','ok');return;}
+  const wk=getWorkout(plan.workoutId);
+  if(!wk){toast('No workout scheduled','warn');return;}
+  const isFuture=new Date(dateStr)>new Date(today());
+  openDayDetail(dateStr,wk,isFuture?'upcoming':'today');
+}
+
+function openDayDetail(dateStr,previewWk,previewKind){
+  const log=S.logs.find(l=>l.date===dateStr);
+  const dLabel=new Date(dateStr).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  let h='';
+  if(log){
+    const totalSets=log.exercises?.reduce((a,e)=>a+(e.sets?.length||0),0)||0;
+    const totalVol=log.exercises?.reduce((a,e)=>a+(e.sets?.reduce((sa,s)=>(+s.r||0)*(+s.k||0)+sa,0)||0),0)||0;
+    h+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--t1);margin-bottom:2px">${log.wkName||'Workout'}</div>
+    <div style="font-size:13px;color:var(--t3);margin-bottom:14px">${dLabel} · Completed</div>
+    <div style="display:flex;gap:16px;margin-bottom:16px">
+      <div style="font-size:13px;color:var(--t2)">💪 <strong>${log.exercises?.length||0}</strong> exercises</div>
+      <div style="font-size:13px;color:var(--t2)">📋 <strong>${totalSets}</strong> sets</div>
+      ${totalVol>0?`<div style="font-size:13px;color:var(--t2)">🏋️ <strong>${totalVol.toFixed(0)}</strong> ${wu()} vol</div>`:''}
+    </div>`;
+    (log.exercises||[]).forEach(ex=>{
+      const vol=ex.sets?.reduce((a,s)=>(+s.r||0)*(+s.k||0)+a,0)||0;
+      const best=ex.sets?.reduce((b,s)=>+s.k>+b?+s.k:+b,0)||0;
+      h+=`<div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--bdr)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="font-size:14px;font-weight:700;color:var(--t1)">${ex.name}</div>
+          <span style="font-size:11px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:20px;padding:2px 8px;color:var(--t3)">${DB[ex.muscle]?.label||ex.muscle}</span>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          ${(ex.sets||[]).map((s,si)=>`<div style="background:var(--bg3);border-radius:6px;padding:4px 10px;font-size:13px;font-weight:600;color:var(--t2)">S${si+1}: ${s.r}×${s.k}${wu()}</div>`).join('')}
+        </div>
+        ${vol>0?`<div style="font-size:12px;color:var(--t3);margin-top:5px">Vol: ${vol.toFixed(0)}${wu()} · Best: ${best}${wu()}</div>`:''}
+      </div>`;
+    });
+  } else if(previewWk){
+    h+=`<div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--t1);margin-bottom:2px">${previewWk.name}</div>
+    <div style="font-size:13px;color:var(--t3);margin-bottom:14px">${dLabel} · ${previewKind==='upcoming'?'Scheduled':'Planned'} — not started yet</div>`;
+    (previewWk.exercises||[]).forEach(ex=>{
+      h+=`<div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--bdr)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:14px;font-weight:700;color:var(--t1)">${ex.name}</div>
+          <span style="font-size:11px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:20px;padding:2px 8px;color:var(--t3)">${DB[ex.muscle]?.label||ex.muscle}</span>
+        </div>
+        <div style="font-size:12px;color:var(--t3);margin-top:4px">${ex.sets} sets · ${ex.rMin}-${ex.rMax} reps target</div>
+      </div>`;
+    });
+  } else {
+    h+=`<div style="text-align:center;padding:24px 0;color:var(--t3)">No workout data for this day</div>`;
+  }
+  document.getElementById('daydetail-body').innerHTML=h;
+  document.getElementById('modal-daydetail').classList.add('on');
+}
+function closeDayDetail(){document.getElementById('modal-daydetail').classList.remove('on');}
+
 function buildWeekStrip(){
   const dow=new Date().getDay();
   const todayAbsIdx=dow===0?6:dow-1; // 0=Mon index of TODAY in real world
@@ -2197,7 +2257,7 @@ function buildWeekStrip(){
       icon=wkIconSVG(wk.name,wk.color,16);
     }
 
-    return`<div class="dc${isToday?' today':''}" id="dc-${i}" onclick="tab('workout')">
+    return`<div class="dc${isToday?' today':''}" id="dc-${i}" onclick="dayCircleClick('${dateStr}',${i},${isToday},${done})">
       <div class="dc-label">${day[0]}</div>
       <div class="dc-ring">
         <svg viewBox="0 0 40 40">${ring}</svg>
@@ -2418,7 +2478,7 @@ function pickEx(name,muscle){_pickerOnSelect?.({name,muscle});}
 ═══════════════════════════════════════════ */
 function startSession(wkId){
   const wk=getWorkout(wkId);if(!wk){toast('Workout not found','err');return;}
-  S.sess={wkId,wkName:wk.name,started:now(),exercises:wk.exercises.map(e=>({
+  S.sess={wkId,wkName:wk.name,started:now(),structChanged:false,exercises:wk.exercises.map(e=>({
     ...e,
     ytId:e.ytId||YT[e.name]||'',
     cs:e.muscle==='cardio'
@@ -2605,6 +2665,7 @@ function resetCardioTimer(idx,si){
 function addCardioSet(idx){
   if(S.sess.exercises[idx].cs.length>=2)return;
   S.sess.exercises[idx].cs.push({r:0,k:0,dur:0});
+  S.sess.structChanged=true;
   renderSession();
 }
 
@@ -2615,6 +2676,7 @@ function rmCardioSet(idx){
   const key=`${idx}-${si}`;
   if(_cardioTimers[key]){clearInterval(_cardioTimers[key].iv);delete _cardioTimers[key];}
   cs.pop();
+  S.sess.structChanged=true;
   renderSession();
 }
 
@@ -2674,6 +2736,7 @@ function swapExInSession(idx){
   _pickerOnSelect = (ed)=>{
     const old=S.sess.exercises[idx];
     S.sess.exercises[idx]={...old,name:ed.name,muscle:ed.muscle,ytId:YT[ed.name]||''};
+    S.sess.structChanged=true;
     closeExPicker();
     renderSession();
   };
@@ -2695,6 +2758,7 @@ function moveExInSession(idx, dir){
 function removeExFromSession(idx){
   if(S.sess.exercises.length<=1){toast('Need at least one exercise','warn');return;}
   S.sess.exercises.splice(idx,1);
+  S.sess.structChanged=true;
   renderSession();
 }
 
@@ -2743,15 +2807,31 @@ function updateTodayRing(){
         stroke-linecap="round" transform="rotate(-90 20 20)"/>`;
   }
 }
-function addS(i){S.sess.exercises[i].cs.push({r:'',k:''});renderSession();}
-function rmS(i){if(S.sess.exercises[i].cs.length<=1){toast('Minimum 1 set','warn');return;}S.sess.exercises[i].cs.pop();renderSession();}
+function addS(i){S.sess.exercises[i].cs.push({r:'',k:''});S.sess.structChanged=true;renderSession();}
+function rmS(i){if(S.sess.exercises[i].cs.length<=1){toast('Minimum 1 set','warn');return;}S.sess.exercises[i].cs.pop();S.sess.structChanged=true;renderSession();}
 function getPrev(name){const sorted=[...S.logs].sort((a,b)=>b.date.localeCompare(a.date));for(const log of sorted){const ex=log.exercises?.find(e=>e.name===name);if(ex?.sets?.length)return ex.sets;}return[];}
 function isPB(name,r,k){const rv=+r,kv=+k;if(!rv||!kv)return false;for(const log of S.logs){const ex=log.exercises?.find(e=>e.name===name);if(ex?.sets)for(const s of ex.sets)if(+s.k>=kv&&+s.r>=rv)return false;}return S.logs.length>0;}
 async function finSess(){
   if(!S.sess)return;
+  if(S.sess.structChanged){
+    document.getElementById('modal-savechoice').classList.add('on');
+    return;
+  }
+  await _doFinSess(false);
+}
+async function _doFinSess(saveTemplate){
+  if(!S.sess)return;
   const log={id:uid(),uid:S.user.id,date:today(),wkName:S.sess.wkName,exercises:S.sess.exercises.map(e=>({name:e.name,muscle:e.muscle,sets:e.cs.filter(s=>s.r&&s.k)}))};
+  if(saveTemplate&&S.sess.wkId){
+    const wk=getWorkout(S.sess.wkId);
+    if(wk){
+      wk.exercises=S.sess.exercises.map(e=>({name:e.name,muscle:e.muscle,sets:e.cs.length,rMin:e.rMin,rMax:e.rMax,rest:e.rest,ytId:e.ytId||'',note:e.note}));
+      await saveUserWorkoutsAndPlan();
+    }
+  }
   await api('saveLog',{log});S.logs.push(log);S.sess=null;stopTimer();
-  toast('Session saved! Great work 💪','ok');tab('home');go('v-app');
+  document.getElementById('modal-savechoice').classList.remove('on');
+  toast(saveTemplate?'Session saved & workout updated 💪':'Session saved! Great work 💪','ok');tab('home');go('v-app');
 }
 function cancelSession(){S.sess=null;stopTimer();tab('workout');go('v-app');}
 
@@ -4533,7 +4613,7 @@ function rSettings(){
   <div class="settings-section">About</div>
   <div class="settings-group">
     <div class="settings-row">
-      <div><div class="settings-row-lbl">FitBuddy+</div><div class="settings-row-sub">Version 1.3 · July 2026</div></div>
+      <div><div class="settings-row-lbl">FitBuddy+</div><div class="settings-row-sub">Version 1.4 · July 2026</div></div>
     </div>
   </div>
   <div style="height:40px"></div>`;
@@ -5327,6 +5407,34 @@ function renderAIMsgs(){
     </div>
     <div style="padding:12px 20px 20px">
       <button class="btn bp" style="width:100%;font-size:18px" onclick="weighSheetSave()">Save Weight</button>
+    </div>
+  </div>
+</div>
+
+<!-- DAY DETAIL MODAL (past/future workout view) -->
+<div id="modal-daydetail" class="modal-overlay" onclick="if(event.target===this)closeDayDetail()">
+  <div class="modal-sheet">
+    <div class="modal-hd">
+      <span class="modal-title">Workout details</span>
+      <button class="modal-close" onclick="closeDayDetail()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body" id="daydetail-body" style="padding:16px;max-height:60vh;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- SAVE CHOICE MODAL (structural changes made during session) -->
+<div id="modal-savechoice" class="modal-overlay">
+  <div class="modal-sheet" style="max-width:420px;">
+    <div class="modal-hd">
+      <span class="modal-title">Save changes?</span>
+    </div>
+    <div class="modal-body" style="padding:20px 16px;">
+      <p style="font-size:14px;color:var(--t2);margin:0 0 20px;line-height:1.5">You changed exercises or sets in this workout. Save these changes permanently, or just for today's session?</p>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button class="btn bp" onclick="_doFinSess(true)">Save permanently for future workouts</button>
+        <button class="btn bg" onclick="_doFinSess(false)">Just this once</button>
+        <button class="btn bd" onclick="document.getElementById('modal-savechoice').classList.remove('on')">Cancel</button>
+      </div>
     </div>
   </div>
 </div>
